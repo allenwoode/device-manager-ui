@@ -2,10 +2,18 @@
     <j-page-container>
         <div>
             <a-row :gutter="[24, 24]">
-                <a-col :span="24"><TopCard @serviceChange='serviceChange' /> </a-col>
-                <a-col :span="24" v-if="isNoCommunity"><Network :serviceId='serviceId' /></a-col>
-                <a-col :span="12"><Cpu :isNoCommunity="isNoCommunity" :serviceId='serviceId'/></a-col>
-                <a-col :span="12"><Jvm :isNoCommunity="isNoCommunity" :serviceId='serviceId'/></a-col>
+                <a-col :span="24">
+                    <TopCard @serviceChange='serviceChange' />
+                </a-col>
+                <a-col :span="24" v-if="isNoCommunity">
+                    <Network :serviceId='serviceId' />
+                </a-col>
+                <a-col :span="12">
+                    <Cpu :isNoCommunity="isNoCommunity" :serviceId='serviceId'/>
+                </a-col>
+                <a-col :span="12">
+                    <Jvm :isNoCommunity="isNoCommunity" :serviceId='serviceId'/>
+                </a-col>
             </a-row>
         </div>
     </j-page-container>
@@ -26,4 +34,5 @@ const serviceChange = (id: string) => {
 
 </script>
 
-<style lang="less" scoped></style>
+<style lang="less" scoped>
+</style>

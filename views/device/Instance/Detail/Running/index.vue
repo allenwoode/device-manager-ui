@@ -8,6 +8,7 @@
                 @search="onSearch"
                 :allowClear="true"
             />
+
             <a-tabs
                 tab-position="left"
                 style="height: 500px"
@@ -29,6 +30,7 @@
                     </template>
                 </a-tab-pane>
             </a-tabs>
+
             <JEmpty v-else style="margin: 180px 0" />
         </div>
         <div class="property-box-right">
@@ -94,6 +96,7 @@ watch(
         deep: true,
     },
 );
+
 // watch(
 //     () => events.value,
 //     (newVal) => {
