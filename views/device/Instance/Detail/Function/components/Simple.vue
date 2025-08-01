@@ -290,19 +290,20 @@ const handleExecute = async (func: any) => {
     RefMap[func.id]
         .validate()
         .then(async () => {
-            const obj = {};
-            func.table.forEach((item: any) => {
+        const obj = {};
+        func.table.forEach((item: any) => {
                 if (item.type === 'object' && item.value) {
-                    obj[item.id] = JSON.parse(item.value);
+                        obj[item.id] = JSON.parse(item.value);
                 } else if (!isNil(item.value)) {
                     obj[item.id] = item.value;
                 }
-            });
-            loading.value = true;
-            const { success, result } = await execute(
-                route.params.id as string,
-                func.id,
-                obj,
+        });
+        
+        loading.value = true;
+        const { success, result } = await execute(
+            route.params.id as string,
+            func.id,
+            obj,
             )
                 .catch(() => {
                     loading.value = false;
@@ -310,15 +311,17 @@ const handleExecute = async (func: any) => {
                 .finally(() => {
                     loading.value = false;
                 });
-            if (!success) return;
-            onlyMessage($t('components.Simple.448047-9'));
-            executeResult.value = result instanceof Array ? result[0] : result;
-            RefMap[func.id]?.$forceUpdate();
+        if (!success) return;
+        onlyMessage($t('components.Simple.448047-9'));
+        executeResult.value = result instanceof Array ? result[0] : result;
+        RefMap[func.id]?.$forceUpdate();
         })
         .catch((err: any) => {
             console.log('err: ', err);
         });
+
 };
+
 /**
  * 清空
  */
