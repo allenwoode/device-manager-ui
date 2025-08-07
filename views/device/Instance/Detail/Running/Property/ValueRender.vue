@@ -396,7 +396,7 @@ const getDetail = (_type: string) => {
         .status-indicators {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
             flex-wrap: wrap;
 
             .status-dot {
@@ -452,7 +452,7 @@ const getDetail = (_type: string) => {
 
                 &.lock-locked {
                     //color: #ff4d4f; // 红色 - 已锁定
-                    color: #8c8c8c;
+                    color: #d9d9d9;
                 }
             }
         }
@@ -479,6 +479,11 @@ const getDetail = (_type: string) => {
     }
 
     .otherValue {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        
         img {
             width: 40px;
         }
@@ -487,7 +492,8 @@ const getDetail = (_type: string) => {
         .status-indicators {
             display: flex;
             align-items: center;
-            gap: 6px;
+            justify-content: center;
+            gap: 10px;
 
             .status-dot {
                 width: 12px;
@@ -522,7 +528,8 @@ const getDetail = (_type: string) => {
         .lock-status {
             display: flex;
             align-items: center;
-            gap: 6px;
+            justify-content: center;
+            gap: 4px;
 
             .lock-icon {
                 font-size: 14px;
@@ -532,12 +539,18 @@ const getDetail = (_type: string) => {
                 }
 
                 &.lock-locked {
-                    color: #8c8c8c;
+                    color: #d9d9d9;
                 }
             }
         }
 
         .value-content {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            
             &.numeric-value {
                 font-size: 16px;
                 font-weight: 600;
