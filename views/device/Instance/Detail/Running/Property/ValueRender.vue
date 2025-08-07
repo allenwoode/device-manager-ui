@@ -94,6 +94,22 @@
             </div>
         </div>
 
+        <!-- 锁状态显示 - 使用lock/unlock图标 -->
+        <div v-else-if="isLockStatus" :class="valueClass">
+            <div class="lock-status">
+                <template v-if="Array.isArray(statusValues) && statusValues.length > 1">
+                    <span 
+                        v-for="(status, index) in statusValues" 
+                        :key="index"
+                        class="lock-icon"
+                        :class="getLockIconClass(status)"
+                    >
+                        <FontAwesomeIcon :icon="String(status) !== '0' ? ['fas', 'lock'] : ['fas', 'lock-open']" 
+                        />
+                    </span>
+                </template>
+            </div>
+        </div>
         <!-- 状态指示器样式 - 支持圆点状态显示 -->
         <div v-else-if="isStatusIndicator" :class="valueClass">
             <div class="status-indicators">
@@ -135,6 +151,12 @@ import { onlyMessage } from '@jetlinks-web/utils';
 import ValueDetail from './ValueDetail.vue';
 import { getType, imgMap, imgList, videoList, fileList } from './index';
 import { useI18n } from 'vue-i18n';
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+import { library } from '@fortawesome/fontawesome-svg-core';
+import { faLock, faUnlock, faLockOpen } from '@fortawesome/free-solid-svg-icons';
+
+// 添加图标到 FontAwesome 库
+library.add(faLock, faUnlock, faLockOpen);
 
 const { t: $t } = useI18n();
 const _data = defineProps({
@@ -429,7 +451,8 @@ const getDetail = (_type: string) => {
                 }
 
                 &.lock-locked {
-                    color: #ff4d4f; // 红色 - 已锁定
+                    //color: #ff4d4f; // 红色 - 已锁定
+                    color: #8c8c8c;
                 }
             }
         }
@@ -502,14 +525,14 @@ const getDetail = (_type: string) => {
             gap: 6px;
 
             .lock-icon {
-                font-size: 16px;
+                font-size: 14px;
 
                 &.lock-unlocked {
                     color: #52c41a;
                 }
 
                 &.lock-locked {
-                    color: #ff4d4f;
+                    color: #8c8c8c;
                 }
             }
         }
