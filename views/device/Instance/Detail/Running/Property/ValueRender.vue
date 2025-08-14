@@ -72,16 +72,13 @@
                 </template>
             </template>
         </div>
-        
-        <!-- <div
+        <div
             v-else-if="_data.data?.valueType?.type === 'object'"
             @click="getDetail('obj')"
             :class="valueClass"
         >
             <img :src="imgMap.get('obj')" />
-            <j-ellipsis>{{ value?.formatValue.state }}</j-ellipsis>
-        </div> -->
-
+        </div>
         <div
             v-else-if="
                 _data.data?.valueType?.type === 'geoPoint' ||
@@ -91,42 +88,6 @@
         >
             <div style='width: 100%; white-space: normal;'>
                 <j-ellipsis>{{ JSON.stringify(value?.formatValue) }}</j-ellipsis>
-            </div>
-        </div>
-
-        <!-- 锁状态显示 - 使用lock/unlock图标 -->
-        <div v-else-if="isLockStatus" :class="valueClass">
-            <div class="lock-status">
-                <template v-if="Array.isArray(statusValues) && statusValues.length > 1">
-                    <span 
-                        v-for="(status, index) in statusValues" 
-                        :key="index"
-                        class="lock-icon"
-                        :class="getLockIconClass(status)"
-                    >
-                        <FontAwesomeIcon :icon="String(status) !== '0' ? ['fas', 'lock'] : ['fas', 'lock-open']" 
-                        />
-                    </span>
-                </template>
-            </div>
-        </div>
-        <!-- 状态指示器样式 - 支持圆点状态显示 -->
-        <div v-else-if="isStatusIndicator" :class="valueClass">
-            <div class="status-indicators">
-                <template v-if="Array.isArray(statusValues) && statusValues.length > 1">
-                    <span 
-                        v-for="(status, index) in statusValues" 
-                        :key="index"
-                        class="status-dot"
-                        :class="getStatusClass(status)"
-                    ></span>
-                </template>
-                <template v-else>
-                    <span 
-                        class="status-dot"
-                        :class="getStatusClass(value?.formatValue)"
-                    ></span>
-                </template>
             </div>
         </div>
         <!-- 数值显示样式 - 针对数字类型优化显示 -->
@@ -151,12 +112,6 @@ import { onlyMessage } from '@jetlinks-web/utils';
 import ValueDetail from './ValueDetail.vue';
 import { getType, imgMap, imgList, videoList, fileList } from './index';
 import { useI18n } from 'vue-i18n';
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
-import { library } from '@fortawesome/fontawesome-svg-core';
-import { faLock, faUnlock, faLockOpen } from '@fortawesome/free-solid-svg-icons';
-
-// 添加图标到 FontAwesome 库
-library.add(faLock, faUnlock, faLockOpen);
 
 const { t: $t } = useI18n();
 const _data = defineProps({
