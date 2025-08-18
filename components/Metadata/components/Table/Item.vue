@@ -121,6 +121,7 @@
 
 <script setup name="ObjectItem">
 import BooleanSelect from "../BooleanSelect/index.vue";
+
 import {
   ArrayParams,
   BooleanParams, DateParams, DoubleParams, EditTable,
@@ -128,6 +129,7 @@ import {
   FileParams, IntegerParams, ObjectParams,
   StringParams, TypeSelect
 } from "../../index";
+
 import {isObject} from "lodash-es";
 import { useI18n } from 'vue-i18n';
 

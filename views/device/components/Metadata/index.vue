@@ -50,6 +50,7 @@
                     >
                 </a-space>
             </template>
+
             <a-tab-pane :tab="$t('Metadata.index.838029-6')" key="properties">
                 <BaseMetadata
                     :target="type"
@@ -57,6 +58,7 @@
                     :permission="permission"
                 />
             </a-tab-pane>
+
             <a-tab-pane :tab="$t('Metadata.index.838029-7')" key="functions">
                 <BaseMetadata
                     :target="type"
@@ -64,6 +66,7 @@
                     :permission="permission"
                 />
             </a-tab-pane>
+
             <a-tab-pane :tab="$t('Metadata.index.838029-8')" key="events">
                 <BaseMetadata
                     :target="type"
@@ -71,6 +74,7 @@
                     :permission="permission"
                 />
             </a-tab-pane>
+
             <a-tab-pane :tab="$t('Metadata.index.838029-9')" key="tags">
                 <BaseMetadata
                     :target="type"
@@ -78,7 +82,9 @@
                     :permission="permission"
                 />
             </a-tab-pane>
+
         </a-tabs>
+
         <teleport v-if="content" :to="content">
           <div
             class="center-extra-content"
@@ -87,12 +93,14 @@
             <span class="desc">{{ $t('Metadata.index.838029-5') }}</span >
           </div>
         </teleport>
+
         <Import
             v-if="visible"
             v-model:visible="visible"
             :type="type"
             @close="visible = false"
         />
+        
         <Cat v-model:visible="cat" @close="cat = false" :type="type" />
     </div>
 </template>
@@ -123,6 +131,7 @@ const props = defineProps<Props>();
 const permission = computed(() =>
     props.type === 'device' ? 'device/Instance' : 'device/Product',
 );
+
 const visible = ref(false);
 const cat = ref(false);
 const tabActiveKey = ref('properties');

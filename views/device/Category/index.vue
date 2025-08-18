@@ -1,11 +1,11 @@
 <!--产品分类 -->
 <template>
     <j-page-container>
-        <pro-search
+        <!-- <pro-search
             :columns="columns"
             target="category"
             @search="handleSearch"
-        />
+        /> -->
         <FullPage :fixed="false">
             <j-pro-table
                 ref="tableRef"
@@ -59,9 +59,7 @@
                                 style="padding: 0; margin: 0"
                                 :danger="i.key === 'delete'"
                             >
-                                <template #icon
-                                    ><AIcon :type="i.icon"
-                                /></template>
+                                <template #icon><AIcon :type="i.icon"/></template>
                             </j-permission-button>
                         </template>
                     </a-space>
@@ -253,6 +251,7 @@ const table = reactive({
     //         width: 120,
     //     },
     // ],
+    
     /**
      * 添加产品分类
      */
@@ -274,10 +273,12 @@ const table = reactive({
         tableRef.value.reload();
     },
 });
+
 const { add, refresh } = toRefs(table);
 /**
  * 初始化
  */
+
 </script>
 <style scoped lang="less">
 :deep(._jtable-body_1eyxz_1 ._jtable-pagination_1eyxz_43) {

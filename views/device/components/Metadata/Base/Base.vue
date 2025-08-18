@@ -38,6 +38,7 @@
               </span>
             </a-space>
           </div>
+
           <div class="extra-center">
             <div v-if="copyDetail.index" class="extra-copy-tip">
               <div class="extra-copy-tip-context">
@@ -58,6 +59,7 @@
               </div>
             </div>
           </div>
+
           <div class="extra-right">
             <a-button @click="() => fullToggle(isFullscreen, fullScreenToggle)">
               <template #icon>
@@ -92,6 +94,7 @@
           </div>
         </div>
       </template>
+
       <template #bodyExtra v-if="hasOperate('add', type)">
         <div class="noEdit-tip">
           <div>
@@ -107,6 +110,7 @@
           </div>
         </div>
       </template>
+
       <template #id="{ record, index }">
         <EditTableFormItem :name="[index, 'id']" @change="metadataChange">
           <a-input
@@ -116,6 +120,7 @@
           />
         </EditTableFormItem>
       </template>
+
       <template #name="{ record, index }">
         <EditTableFormItem :name="[index, 'name']" @change="metadataChange">
           <a-input
@@ -125,14 +130,15 @@
           />
         </EditTableFormItem>
       </template>
+
       <template #valueType="{ record, index }">
         <EditTableFormItem
           :name="[index, 'valueType']"
           @change="metadataChange"
         >
           <div
-            style="display: flex; align-items: center"
             v-if="['properties', 'tags'].includes(type)"
+            style="display: flex; align-items: center"
           >
             <TypeSelect
               v-model:value="record.valueType"
@@ -191,6 +197,7 @@
               :level="2"
             />
           </div>
+          
           <div v-else-if="type === 'events'">
             <ObjectParams v-model:value="record.valueType.properties" :level="2">
               <a-button
@@ -213,6 +220,7 @@
           </div>
         </EditTableFormItem>
       </template>
+      
       <template #expands="{ record, index }">
         <EditTableFormItem :name="[index, 'expands']" @change="metadataChange">
           <Source
@@ -240,6 +248,7 @@
           />
         </EditTableFormItem>
       </template>
+
       <template #other="{ record }">
         <div>
           <OtherSetting
@@ -265,6 +274,7 @@
           />
         </div>
       </template>
+
       <template #async="{ record }">
         <BooleanSelect
           v-model:value="record.async"
@@ -277,6 +287,7 @@
           @change="metadataChange"
         />
       </template>
+
       <template #inputs="{ record, index }">
         <EditTableFormItem :name="[index, 'inputs']" @change="metadataChange">
           <ObjectParams v-model:value="record.inputs" :type="type" :level="2">
@@ -294,6 +305,7 @@
           </ObjectParams>
         </EditTableFormItem>
       </template>
+
       <template #output="{ record, index }">
         <EditTableFormItem :name="[index, 'output']" @change="metadataChange">
           <div style="display: flex; align-items: center">
@@ -355,6 +367,7 @@
           </div>
         </EditTableFormItem>
       </template>
+
       <template #description="{ record, index }">
         <EditTableFormItem :name="[index, 'description']">
           <a-input
@@ -365,6 +378,7 @@
           />
         </EditTableFormItem>
       </template>
+
       <template #properties="{ record, index }">
         <EditTableFormItem
           :name="[index, 'properties']"
@@ -377,6 +391,7 @@
           />
         </EditTableFormItem>
       </template>
+
       <template #group="{ record }">
         <GroupSelect
           v-model:value="record.expands.group"
@@ -385,11 +400,13 @@
         />
       </template>
     </EditTable>
+    
     <div>
       {{ $t("Base.Base.640395-15") }}
       <span class="metadata-result-total">{{ effectiveDataLength }}</span>
       {{ $t("Base.Base.640395-16") }}
     </div>
+
     <PropertiesModal
       v-if="type === 'properties' && detailData.visible"
       :data="detailData.data"
@@ -398,18 +415,21 @@
       :unitOptions="unitOptions"
       @cancel="cancelDetailModal"
     />
+
     <FunctionModal
       v-else-if="type === 'functions' && detailData.visible"
       :data="detailData.data"
       :getPopupContainer="getPopupContainer"
       @cancel="cancelDetailModal"
     />
+
     <EventModal
       v-else-if="type === 'events' && detailData.visible"
       :data="detailData.data"
       :getPopupContainer="getPopupContainer"
       @cancel="cancelDetailModal"
     />
+    
     <TagsModal
       v-else-if="type === 'tags' && detailData.visible"
       :data="detailData.data"
@@ -665,15 +685,15 @@ const rightMenuClick = (
       detailData.visible = true;
       break;
     case "delete":
-      // Modal.confirm({
-      //   title: `确认删除【${record.id}】？`,
-      //   onOk() {
-      //     dataSource.value.splice(_index, 1)
-      //   },
-      //   onCancel() {
-      //     console.log('Cancel');
-      //   },
-      // })
+      Modal.confirm({
+        title: `确认删除【${record.id}】？`,
+        onOk() {
+          dataSource.value.splice(_index, 1)
+        },
+        onCancel() {
+          console.log('Cancel');
+        },
+      })
       if (copyDetail.key === record.__key) {
         copyDetail.key = undefined;
         copyDetail.groupName = undefined;

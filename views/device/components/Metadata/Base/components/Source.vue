@@ -59,10 +59,7 @@
           <a-menu-item>
             <PopoverModal
               v-model:visible="modalVisible"
-              :bodyStyle="{
-                                width: '450px',
-                                height: myValue === 'rule' ? '300px' : '80px',
-                            }"
+              :bodyStyle="{width: '450px', height: myValue === 'rule' ? '300px' : '80px',}"
               placement="bottomRight"
               @ok="confirm"
             >

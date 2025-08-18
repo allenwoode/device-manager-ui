@@ -7,4 +7,12 @@ export type CategoryItem = {
   path: string;
   sortIndex: number;
   children?: Category[];
+  metadata: DataItem[];
+};
+
+export type DataItem = {
+  id: string;
+  name: string;
+  required: number;
+  valueType: string;
 };

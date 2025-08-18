@@ -1,39 +1,19 @@
-<template>
-    <PopoverModal
-        v-model:visible="visible"
-        :placement="placement"
-        @ok="onOk"
-        @cancel="onCancel"
-    >
-        <template #content>
-            <div style="width: 750px">
-                <Item
-                  v-if="visible"
-                  ref="tableRef"
-                  :value="myValue"
-                  :type="type"
-                  :level="level"
-                />
-            </div>
-        </template>
-        
-        <slot>
-            <a-button type="link" :disabled="disabled" style="padding: 0">
-                <template #icon>
-                    <AIcon
-                        type="EditOutlined"
-                        :class="{ 'table-form-required-aicon': !value.length }"
-                    />
-                </template>
-            </a-button>
-        </slot>
-    </PopoverModal>
+<template #content>
+    <div style="width: 750px">
+        <Item
+            v-if="visible"
+            ref="tableRef"
+            :value="myValue"
+            :type="type"
+            :level="level"
+        />
+    </div>
 </template>
-
-<script setup name="MetadataObject">
-import { PopoverModal } from '../index';
+        
+<script setup name="TableParams">
+import { ref } from 'vue';
 import { Form } from 'ant-design-vue';
-import Item from './Item.vue'
+import Item from './Item.vue';
 
 const props = defineProps({
     value: {

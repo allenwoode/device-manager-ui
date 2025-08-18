@@ -15,3 +15,5 @@ export { default as GroupSelect } from './Group/index.vue'
 export { default as BooleanSelect } from './BooleanSelect/index.vue'
 
 export { default as ReadType } from './ReadType.vue'
+
+export { default as TableParams } from './Table/index.vue'

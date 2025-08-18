@@ -78,8 +78,6 @@ const ok = () => {
   cancel()
 }
 
-
-
 </script>
 
 <style scoped>
