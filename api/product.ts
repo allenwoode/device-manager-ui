@@ -99,7 +99,7 @@ export const _undeploy = (productId: string) => request.post(`/device-product/${
  * @param data
  * @returns
  */
-export const addProduct = (data:any) => request.post('/device-product',data)
+export const addProduct = (data:any) => request.post('/device-product', data)
 
 /**
  * 修改产品
