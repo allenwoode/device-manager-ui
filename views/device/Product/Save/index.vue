@@ -1,15 +1,7 @@
 <!-- 新增、编辑产品 -->
 <template>
-    <a-modal 
-        :title="props.title" 
-        :maskClosable="false" 
-        destroy-on-close 
-        v-model:visible="visible" 
-        @ok="submitData"
-        @cancel="close" 
-        :okText="$t('Save.index.912481-0')" 
-        :cancelText="$t('Save.index.912481-1')" 
-        width="650px"
+    <a-modal :title="props.title" :maskClosable="false" destroy-on-close v-model:visible="visible" @ok="submitData"
+        @cancel="close" :okText="$t('Save.index.912481-0')" :cancelText="$t('Save.index.912481-1')" width="650px"
         :confirmLoading="loading">
         <div style="margin-top: 10px">
             <a-form layout="vertical" :model="form" :rules="rules" ref="formRef">
@@ -17,8 +9,8 @@
                     <a-col flex="180px">
                         <a-form-item name="photoUrl">
                             <pro-upload v-model="form.photoUrl" :accept="imageTypes && imageTypes.length
-                                    ? imageTypes.toString()
-                                    : ''
+                                ? imageTypes.toString()
+                                : ''
                                 " />
                         </a-form-item>
                     </a-col>
@@ -44,35 +36,36 @@
                             label: 'name',
                             value: 'id',
                             children: 'children',
-                        }" 
-                        :filterTreeNode="(v, option) => filterSelectNode(v, option, 'name')">
+                        }" :filterTreeNode="(v, option) => filterSelectNode(v, option, 'name')">
                         <template></template>
                     </a-tree-select>
                     <!-- 动态表单 -->
-                    <div v-if="selectedItemMetadata && metadataProperties && Object.keys(metadataProperties).length > 0" style="margin-top: 16px;">
+                    <div v-if="selectedItemMetadata && metadataProperties && Object.keys(metadataProperties).length > 0"
+                        style="margin-top: 16px;">
                         <a-divider style="margin: 12px 0 12px 0;">
                             <span style="font-size: 12px; color: #666;">元数据配置</span>
                         </a-divider>
                         <a-form layout="vertical" ref="metadataFormRef" :model="metadataForm">
                             <template v-for="(property, key) in metadataProperties" :key="`metadata-${key}`">
-                                <a-form-item :name="String(key)" :rules="getFieldRules(property)" style="margin-bottom: 10px;">
+                                <a-form-item :name="property.id" :rules="getFieldRules(property)"
+                                    style="margin-bottom: 10px;">
                                     <template #label>
-                                        <span>{{ property.name || property.id }}</span>
+                                        <span>{{ property.name }}</span>
                                     </template>
                                     <!-- 枚举类型 -->
                                     <a-select
                                         v-if="property?.valueType?.type === 'enum' && property?.valueType?.elements"
-                                        v-model:value="metadataForm[key]" :placeholder="`请选择${property.name || key}`"
-                                        allow-clear>
+                                        v-model:value="metadataForm[property.id]"
+                                        :placeholder="`请选择${property.name || key}`" allow-clear>
                                         <a-select-option v-for="item in property.valueType.elements"
-                                            :key="item?.value || Math.random()" :value="item.value">
+                                            :key="item?.value || Math.random()" :value="item.text">
                                             {{ item.text }}
                                         </a-select-option>
                                     </a-select>
 
                                     <!-- 布尔类型 -->
                                     <a-radio-group v-else-if="property?.valueType?.type === 'boolean'"
-                                        v-model:value="metadataForm[key]">
+                                        v-model:value="metadataForm[property.id]">
                                         <a-radio :value="true">是</a-radio>
                                         <a-radio :value="false">否</a-radio>
                                     </a-radio-group>
@@ -80,24 +73,24 @@
                                     <!-- 数字类型 -->
                                     <a-input-number
                                         v-else-if="property?.valueType?.type && ['int', 'long', 'float', 'double'].includes(property.valueType.type)"
-                                        v-model:value="metadataForm[key]" :placeholder="`请输入${property.name || key}`"
-                                        style="width: 100%"
+                                        v-model:value="metadataForm[property.id]"
+                                        :placeholder="`请输入${property.name || key}`" style="width: 100%"
                                         :precision="property.valueType?.type === 'int' || property.valueType?.type === 'long' ? 0 : 2" />
 
                                     <!-- 日期类型 -->
                                     <a-date-picker v-else-if="property?.valueType?.type === 'date'"
-                                        v-model:value="metadataForm[key]" :placeholder="`请选择${property.name || key}`"
-                                        style="width: 100%" />
+                                        v-model:value="metadataForm[property.id]"
+                                        :placeholder="`请选择${property.name || key}`" style="width: 100%" />
 
                                     <!-- 对象/数组类型 -->
                                     <a-textarea
                                         v-else-if="property?.valueType?.type && ['object', 'array'].includes(property.valueType.type)"
-                                        v-model:value="metadataForm[key]"
+                                        v-model:value="metadataForm[property.id]"
                                         :placeholder="`请输入JSON格式的${property.name || key}`"
                                         :auto-size="{ minRows: 3, maxRows: 6 }" @blur="validateJSON(key)" />
 
                                     <!-- 默认文本类型 -->
-                                    <a-input v-else v-model:value="metadataForm[key]"
+                                    <a-input v-else v-model:value="metadataForm[property.id]"
                                         :placeholder="`请输入${property.name || key}`" />
 
                                 </a-form-item>
@@ -212,6 +205,7 @@ const form = reactive({
     deviceType: '',
     describe: undefined,
     photoUrl: device.deviceProduct,
+    extraData: '',
 });
 /**
  * 校验id
@@ -286,8 +280,16 @@ const valueChange = (value: string, label: string) => {
         const selectedItem = findItemById(treeList.value, value);
         selectedItemMetadata.value = selectedItem?.metadata || null;
 
-        // 初始化metadata表单
-        initMetadataForm();
+        // 如果metadata为空或null，清空表单
+        if (!selectedItemMetadata.value) {
+            // 先清空现有数据
+            Object.keys(metadataForm).forEach(key => {
+                delete metadataForm[key];
+            });
+        } else {
+            // 初始化metadata表单
+            initMetadataForm();
+        }
     } else {
         selectedItemMetadata.value = null;
         // 清空metadata表单
@@ -388,54 +390,59 @@ const validateJSON = (key: string) => {
  * 初始化metadata表单
  */
 const initMetadataForm = (existingData?: Record<string, any>) => {
-    // 清空现有数据，使用Vue 3的响应式方式
+    // 先清空现有数据
     Object.keys(metadataForm).forEach(key => {
-        metadataForm[key] = undefined;
+        delete metadataForm[key];
     });
 
     // 根据metadata的properties初始化表单字段
     const properties = getMetadataProperties();
+    const extraData = typeof existingData === 'string' && existingData !== '' ? JSON.parse(existingData) : existingData;
+
     if (properties) {
         Object.keys(properties).forEach(key => {
             const property = properties[key];
             const valueType = property.valueType?.type;
+            const id = property.id;
 
             // 如果有现有数据，优先使用现有数据
             if (existingData && existingData.hasOwnProperty(key)) {
                 // 对于对象和数组类型，需要转换为JSON字符串
                 if (['object', 'array'].includes(valueType) && typeof existingData[key] === 'object') {
-                    metadataForm[key] = JSON.stringify(existingData[key], null, 2);
+                    metadataForm[id] = JSON.stringify(extraData[id], null, 2);
                 } else {
-                    metadataForm[key] = existingData[key];
+                    metadataForm[id] = extraData[id];
                 }
                 return;
             }
 
             // 根据不同类型设置默认值
+            let defaultValue;
             switch (valueType) {
                 case 'boolean':
-                    metadataForm[key] = false;
+                    defaultValue = false;
                     break;
                 case 'int':
                 case 'long':
                 case 'float':
                 case 'double':
-                    metadataForm[key] = undefined;
+                    defaultValue = null;
                     break;
                 case 'enum':
-                    metadataForm[key] = undefined;
+                    defaultValue = null;
                     break;
                 case 'date':
-                    metadataForm[key] = undefined;
+                    defaultValue = null;
                     break;
                 case 'object':
                 case 'array':
-                    metadataForm[key] = '';
+                    defaultValue = '';
                     break;
                 default:
-                    metadataForm[key] = '';
+                    defaultValue = '';
                     break;
             }
+            metadataForm[id] = defaultValue;
         });
     }
 };
@@ -477,6 +484,7 @@ const show = (data: any) => {
         form.describe = data.describe;
         form.id = data.id;
         idDisabled.value = true;
+        form.extraData = data.extraData;
 
         // 设置选中项的metadata
         if (form.classifiedId) {
@@ -494,8 +502,8 @@ const show = (data: any) => {
             };
             const selectedItem = findItemById(treeList.value, form.classifiedId);
             selectedItemMetadata.value = selectedItem?.metadata || null;
-            // 编辑模式下，传入现有的metadata数据进行回填
-            initMetadataForm(data.metadata);
+            // 编辑模式下，传入现有的extraData数据进行回填
+            initMetadataForm(data.extraData);
         } else {
             selectedItemMetadata.value = null;
             Object.keys(metadataForm).forEach(key => {
@@ -535,6 +543,9 @@ const { resetFields, validate, validateInfos, clearValidate } = useForm(
  */
 const submitData = async () => {
     try {
+        form.classifiedId = form.classifiedId || '';
+        form.classifiedName = form.classifiedName || '';
+
         // 验证主表单
         await formRef.value.validate();
 
@@ -548,6 +559,32 @@ const submitData = async () => {
             }
         }
 
+        // 合并metadata表单数据，处理JSON字符串
+        const processedMetadata: Record<string, any> = {};
+        if (Object.keys(metadataForm).length > 0) {
+            const properties = getMetadataProperties();
+            Object.keys(metadataForm).forEach(key => {
+                const property = properties?.[key];
+                const valueType = property?.valueType?.type;
+                const value = metadataForm[key];
+
+                if (['object', 'array'].includes(valueType) && typeof value === 'string' && value.trim()) {
+                    try {
+                        processedMetadata[key] = JSON.parse(value);
+                    } catch (e) {
+                        processedMetadata[key] = value; // 如果解析失败，保持原值
+                    }
+                } else {
+                    processedMetadata[key] = value;
+                }
+            });
+        }
+
+        const submitForm = {
+            ...form,
+            extraData: Object.keys(processedMetadata).length > 0 ? JSON.stringify(processedMetadata) : ''
+        };
+
         // 验证通过，继续提交
         loading.value = true
         // 新增
@@ -555,32 +592,6 @@ const submitData = async () => {
             if (form.id === '') {
                 form.id = undefined;
             }
-
-            // 合并metadata表单数据，处理JSON字符串
-            const processedMetadata: Record<string, any> = {};
-            if (Object.keys(metadataForm).length > 0) {
-                const properties = getMetadataProperties();
-                Object.keys(metadataForm).forEach(key => {
-                    const property = properties?.[key];
-                    const valueType = property?.valueType?.type;
-                    const value = metadataForm[key];
-
-                    if (['object', 'array'].includes(valueType) && typeof value === 'string' && value.trim()) {
-                        try {
-                            processedMetadata[key] = JSON.parse(value);
-                        } catch (e) {
-                            processedMetadata[key] = value; // 如果解析失败，保持原值
-                        }
-                    } else {
-                        processedMetadata[key] = value;
-                    }
-                });
-            }
-
-            const submitForm = {
-                ...form,
-                metadata: Object.keys(processedMetadata).length > 0 ? processedMetadata : undefined
-            };
 
             const res = await addProduct(submitForm).finally(() => {
                 loading.value = false
@@ -595,35 +606,6 @@ const submitData = async () => {
             }
         } else if (props.isAdd === 2) {
             // 编辑
-            form.classifiedId = form.classifiedId || ''
-            form.classifiedName = form.classifiedName || ''
-
-            // 合并metadata表单数据，处理JSON字符串
-            const processedMetadata: Record<string, any> = {};
-            if (Object.keys(metadataForm).length > 0) {
-                const properties = getMetadataProperties();
-                Object.keys(metadataForm).forEach(key => {
-                    const property = properties?.[key];
-                    const valueType = property?.valueType?.type;
-                    const value = metadataForm[key];
-
-                    if (['object', 'array'].includes(valueType) && typeof value === 'string' && value.trim()) {
-                        try {
-                            processedMetadata[key] = JSON.parse(value);
-                        } catch (e) {
-                            processedMetadata[key] = value; // 如果解析失败，保持原值
-                        }
-                    } else {
-                        processedMetadata[key] = value;
-                    }
-                });
-            }
-
-            const submitForm = {
-                ...form,
-                metadata: Object.keys(processedMetadata).length > 0 ? processedMetadata : undefined
-            };
-
             const res = await editProduct(submitForm).finally(() => {
                 loading.value = false
             });
