@@ -608,6 +608,8 @@
     "Category.index.779035-3": "enum(枚举型)",
     "Category.index.779036-1": "参数标识",
     "Category.index.779036-2": "参数名称",
+    "Category.index.779036-3": "是否必填",
+    "Category.index.779036-4": "参数类型",
 
     "Metadata.index.838029-0": "确认重置？",
     "Metadata.index.838029-1": "重置后将使用产品的物模型配置",

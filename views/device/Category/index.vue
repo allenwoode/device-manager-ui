@@ -1,11 +1,11 @@
 <!--产品分类 -->
 <template>
     <j-page-container>
-        <!-- <pro-search
+        <pro-search
             :columns="columns"
             target="category"
             @search="handleSearch"
-        /> -->
+        />
         <FullPage :fixed="false">
             <j-pro-table
                 ref="tableRef"

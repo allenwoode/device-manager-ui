@@ -46,7 +46,7 @@
 
       <a-tab-pane key="tab2" :tab="$t('Category.index.779033-16')">
         <EditTable
-          ref="tableRef"
+          ref="formRef"
           :data-source="metadataList"
           :columns="metadataColumns"
           :height="400"
@@ -76,7 +76,7 @@
             <EditTableFormItem :name="[index, 'expands']" @change="metadataChange">
               <a-select
                 v-model:value="record.expands.required"
-                :placeholder="$t('modifyModal.index.177674-15')"
+                :placeholder="$t('Category.index.779036-3')"
                 style="width: 100%"
               >
                 <a-select-option :value="false">{{ $t('Category.index.779034-0') }}</a-select-option>
@@ -90,25 +90,23 @@
               <div class="datatype-container">
                 <a-select
                   v-model:value="record.valueType.type"
-                  :placeholder="$t('modifyModal.index.177674-18')"
+                  :placeholder="$t('Category.index.779036-4')"
                   style="width: 100%"
                 >
                   <a-select-option value="int">{{ $t('Category.index.779035-1') }}</a-select-option>
                   <a-select-option value="string">{{ $t('Category.index.779035-2') }}</a-select-option>
                   <a-select-option value="enum">{{ $t('Category.index.779035-3') }}</a-select-option>
                 </a-select>
-                <div class="table-actions">
                 <a-button
                   v-if="record.valueType.type === 'enum'"
                   type="link"
                   size="small"
                   @click="editEnumData(record, index)"
-                  :disabled="record.expands?.isProduct"
                   title="编辑枚举值"
+                  class="enum-edit-btn"
                 >
                   <EditOutlined />
                 </a-button>
-              </div>
               </div>
             </EditTableFormItem>
           </template>
@@ -150,6 +148,7 @@
     v-model:visible="enumModalVisible"
     :title="`编辑枚举值 - ${currentEnumField?.name || ''}`"
     :width="600"
+    :z-index="2000"
     @ok="saveEnumData"
     @cancel="closeEnumModal"
     :confirmLoading="enumLoading"
@@ -254,7 +253,6 @@ const addObj = ref({});
 const addParams = ref({});
 const loading = ref(false);
 const activeTab = ref('tab1');
-const tableRef = ref();
 
 // 枚举编辑相关
 const enumModalVisible = ref(false);
@@ -358,10 +356,31 @@ const submitData = async () => {
   formRef.value.validate().then(async () => {
     loading.value = true;
     addParams.value = {};
+    
+    // 处理元数据序列化
+    const processedMetadata = metadataList.value.map(item => ({
+      id: item.id,
+      name: item.name,
+      valueType: {
+        type: item.valueType?.type || 'string',
+        elements: item.valueType?.type === 'enum' ? (item.enumData || []) : undefined
+      },
+      expands: {
+        required: item.expands?.required || false
+      }
+    }));
+
+    console.log(processedMetadata)
+    const formDataWithMetadata = {
+      ...formModel.value,
+      metadata: JSON.stringify(processedMetadata)
+    };
+
+    console.log(formDataWithMetadata)
     if (props.isAdd === 0) {
       if (props.isChild === 1) {
         addParams.value = {
-          ...formModel.value,
+          ...formDataWithMetadata,
           // sortIndex:
           //     childArr.value[childArr.value.length - 1].sortIndex + 1,
           parentId: addObj.value.id,
@@ -369,12 +388,12 @@ const submitData = async () => {
       } else if (props.isChild === 2) {
         addParams.value = {
           parentId: addObj.value.id,
-          ...formModel.value,
+          ...formDataWithMetadata,
           // sortIndex: 1,
         };
       } else if (props.isChild === 3) {
         addParams.value = {
-          ...formModel.value,
+          ...formDataWithMetadata,
           // sortIndex: arr.value[arr.value.length - 1].sortIndex + 1,
         };
       }
@@ -391,7 +410,7 @@ const submitData = async () => {
     } else if (props.isAdd === 2) {
       const id = updateObj.value.id;
       const updateParams = {
-        ...formModel.value,
+        ...formDataWithMetadata,
         id: updateObj.value.id,
         key: updateObj.value.key,
         parentId: updateObj.value.parentId,
@@ -463,12 +482,33 @@ const show = async (row: any) => {
   } else if (props.isAdd === 2) {
     updateObj.value = row;
     // 编辑
+    const parsedMetadata = row.metadata ? (typeof row.metadata === 'string' ? JSON.parse(row.metadata) : row.metadata) : [];
     formModel.value = {
       name: row.name,
       sortIndex: row.sortIndex,
       description: row.description,
-      metadata: row.metadata ? (typeof row.metadata === 'string' ? JSON.parse(row.metadata) : row.metadata) : [], // 加载已有的元数据
+      metadata: parsedMetadata, // 加载已有的元数据
     };
+    
+    // 立即同步到 metadataList，确保枚举数据正确映射
+    metadataList.value = parsedMetadata.map((item, index) => {
+      const enumData = item.enumData || item.valueType?.elements || [];
+      return {
+        ...item,
+        enumData: enumData,
+        valueType: {
+          type: item.valueType?.type || 'string',
+          elements: item.valueType?.type === 'enum' ? enumData : undefined
+        },
+        expands: {
+          required: item.expands?.required || false,
+          isProduct: item.expands?.isProduct || false
+        },
+        __dataIndex: index,
+        __key: `${item.id}_${Date.now()}_${index}`
+      };
+    });
+    
     visible.value = true;
   }
   
@@ -536,7 +576,7 @@ const metadataChange = () => {
 /**
  * 元数据编辑变更
  */
-const onMetadataEdit = (changed) => {
+const onMetadataEdit = () => {
   // 处理编辑状态变更
 };
 
@@ -562,11 +602,11 @@ const addMetadataItem = () => {
   metadataList.value.push(newItem);
   
   // 聚焦到新添加的行
-  nextTick(() => {
-    if (tableRef.value) {
-      tableRef.value.scrollToByIndex(metadataList.value.length - 1);
-    }
-  });
+  // nextTick(() => {
+  //   if (tableRef.value) {
+  //     tableRef.value.scrollToByIndex(metadataList.value.length - 1);
+  //   }
+  // });
 };
 
 /**
@@ -591,16 +631,21 @@ const deleteMetadataItem = (index) => {
  * 编辑枚举数据
  */
 const editEnumData = (record, index) => {
+  
   currentEnumField.value = record;
   currentEnumIndex.value = index;
   
-  // 初始化枚举数据
-  if (record.enumData && Array.isArray(record.valueType.elements)) {
-    currentEnumData.value = [...record.valueType.elements];
+  // 初始化枚举数据 - 优先使用 valueType.elements，其次使用 enumData
+  let enumElements = [];
+  if (record.valueType?.elements && Array.isArray(record.valueType.elements)) {
+    enumElements = [...record.valueType.elements];
+  } else if (record.enumData && Array.isArray(record.enumData)) {
+    enumElements = [...record.enumData];
   } else {
-    currentEnumData.value = [];
+    enumElements = [];
   }
   
+  currentEnumData.value = enumElements;
   enumModalVisible.value = true;
 };
 
@@ -633,9 +678,14 @@ const saveEnumData = async () => {
       item.value.trim() !== '' && item.text.trim() !== ''
     );
     
-    // 更新元数据列表中的枚举数据
+    // 更新元数据列表中的枚举数据，watcher 会自动同步到 formModel.value.metadata
     if (currentEnumIndex.value >= 0 && metadataList.value[currentEnumIndex.value]) {
       metadataList.value[currentEnumIndex.value].enumData = validEnumData;
+      // 同时更新 valueType.elements 用于后端序列化
+      if (!metadataList.value[currentEnumIndex.value].valueType) {
+        metadataList.value[currentEnumIndex.value].valueType = { type: 'enum' };
+      }
+      metadataList.value[currentEnumIndex.value].valueType.elements = validEnumData;
     }
     
     enumModalVisible.value = false;
@@ -658,35 +708,50 @@ const closeEnumModal = () => {
   enumLoading.value = false;
 };
 
-// 元数据双向绑定
-// watch(
-//   () => metadataList.value,
-//   (newVal) => {
-//     formModel.value.metadata = newVal.map(item => ({
-//       id: item.id,
-//       name: item.name,
-//       required: item.required,
-//       dataType: item.dataType,
-//       enumData: item.enumData || []
-//     }));
-//   },
-//   { deep: true }
-// );
+// 元数据双向绑定 - metadataList 变化同步到 formModel.value.metadata
+watch(
+  () => metadataList.value,
+  (newVal) => {
+    if (newVal && Array.isArray(newVal)) {
+      formModel.value.metadata = newVal.map(item => ({
+        id: item.id,
+        name: item.name,
+        valueType: {
+          type: item.valueType?.type || 'string',
+          elements: item.valueType?.type === 'enum' ? (item.enumData || item.valueType?.elements || []) : undefined
+        },
+        expands: {
+          required: item.expands?.required || false
+        },
+        enumData: item.enumData || []
+      }));
+    }
+  },
+  { deep: true, immediate: false }
+);
 
 watch(
   () => formModel.value.metadata,
   (newVal) => {
     if (newVal && Array.isArray(newVal)) {
-      metadataList.value = newVal.map((item, index) => ({
-        ...item,
-        enumData: item.enumData || [],
-        expands: {
-          required: item.expands?.required || false,
-          isProduct: item.expands?.isProduct || false
-        },
-        __dataIndex: index,
-        __key: `${item.id}_${Date.now()}_${index}`
-      }));
+      metadataList.value = newVal.map((item, index) => {
+        // 确保枚举数据正确映射
+        const enumData = item.enumData || item.valueType?.elements || [];
+        return {
+          ...item,
+          enumData: enumData,
+          valueType: {
+            type: item.valueType?.type || 'string',
+            elements: item.valueType?.type === 'enum' ? enumData : undefined
+          },
+          expands: {
+            required: item.expands?.required || false,
+            isProduct: item.expands?.isProduct || false
+          },
+          __dataIndex: index,
+          __key: `${item.id}_${Date.now()}_${index}`
+        };
+      });
     }
   },
   { deep: true }
@@ -831,5 +896,19 @@ defineExpose({
   flex: 1;
   width: 100%;
   gap: 4px;
+}
+
+.enum-edit-btn {
+  width: 32px;
+  height: 32px;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.enum-edit-btn:hover {
+  background-color: #f0f0f0;
+  border-radius: 4px;
 }
 </style>
