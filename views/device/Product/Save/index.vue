@@ -367,7 +367,6 @@ const getMetadataProperties = () => {
 
         return null;
     } catch (error) {
-        console.warn('Failed to parse metadata:', error);
         return null;
     }
 };
@@ -554,7 +553,6 @@ const submitData = async () => {
             try {
                 await metadataFormRef.value.validate();
             } catch (error) {
-                console.warn('Metadata form validation failed:', error);
                 throw error; // 重新抛出错误以阻止提交
             }
         }

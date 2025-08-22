@@ -14,7 +14,7 @@
     v-bind="layout"
   >
     <a-tabs v-model:activeKey="activeTab">
-      <a-tab-pane key="tab1" :tab="$t('Category.index.779033-15')">
+      <a-tab-pane key="tab1" :tab="$t('Category.index.779037-0')">
         <a-form layout="vertical" ref="formRef" :rules="rules" :model="formModel">
           <a-form-item :label="$t('modifyModal.index.177674-2')" name="name">
             <a-input
@@ -44,7 +44,7 @@
         </a-form>
       </a-tab-pane>
 
-      <a-tab-pane key="tab2" :tab="$t('Category.index.779033-16')">
+      <a-tab-pane key="tab2" :tab="$t('Category.index.779037-1')">
         <EditTable
           ref="formRef"
           :data-source="metadataList"
@@ -370,13 +370,11 @@ const submitData = async () => {
       }
     }));
 
-    console.log(processedMetadata)
     const formDataWithMetadata = {
       ...formModel.value,
       metadata: JSON.stringify(processedMetadata)
     };
 
-    console.log(formDataWithMetadata)
     if (props.isAdd === 0) {
       if (props.isChild === 1) {
         addParams.value = {
@@ -708,57 +706,60 @@ const closeEnumModal = () => {
   enumLoading.value = false;
 };
 
+// ============================================= 监听watch()导致页面假死 ===============================================
 // 元数据双向绑定 - metadataList 变化同步到 formModel.value.metadata
-watch(
-  () => metadataList.value,
-  (newVal) => {
-    if (newVal && Array.isArray(newVal)) {
-      formModel.value.metadata = newVal.map(item => ({
-        id: item.id,
-        name: item.name,
-        valueType: {
-          type: item.valueType?.type || 'string',
-          elements: item.valueType?.type === 'enum' ? (item.enumData || item.valueType?.elements || []) : undefined
-        },
-        expands: {
-          required: item.expands?.required || false
-        },
-        enumData: item.enumData || []
-      }));
-    }
-  },
-  { deep: true, immediate: false }
-);
+// watch(
+//   () => metadataList.value,
+//   (newVal) => {
+//     if (newVal && Array.isArray(newVal)) {
+//       formModel.value.metadata = newVal.map(item => ({
+//         id: item.id,
+//         name: item.name,
+//         valueType: {
+//           type: item.valueType?.type || 'string',
+//           elements: item.valueType?.type === 'enum' ? (item.enumData || item.valueType?.elements || []) : undefined
+//         },
+//         expands: {
+//           required: item.expands?.required || false
+//         },
+//         enumData: item.enumData || []
+//       }));
+//     }
+//   },
+//   { deep: true, immediate: false }
+// );
 
-watch(
-  () => formModel.value.metadata,
-  (newVal) => {
-    if (newVal && Array.isArray(newVal)) {
-      metadataList.value = newVal.map((item, index) => {
-        // 确保枚举数据正确映射
-        const enumData = item.enumData || item.valueType?.elements || [];
-        return {
-          ...item,
-          enumData: enumData,
-          valueType: {
-            type: item.valueType?.type || 'string',
-            elements: item.valueType?.type === 'enum' ? enumData : undefined
-          },
-          expands: {
-            required: item.expands?.required || false,
-            isProduct: item.expands?.isProduct || false
-          },
-          __dataIndex: index,
-          __key: `${item.id}_${Date.now()}_${index}`
-        };
-      });
-    }
-  },
-  { deep: true }
-);
+// watch(
+//   () => formModel.value.metadata,
+//   (newVal) => {
+//     if (newVal && Array.isArray(newVal)) {
+//       metadataList.value = newVal.map((item, index) => {
+//         // 确保枚举数据正确映射
+//         const enumData = item.enumData || item.valueType?.elements || [];
+//         return {
+//           ...item,
+//           enumData: enumData,
+//           valueType: {
+//             type: item.valueType?.type || 'string',
+//             elements: item.valueType?.type === 'enum' ? enumData : undefined
+//           },
+//           expands: {
+//             required: item.expands?.required || false,
+//             isProduct: item.expands?.isProduct || false
+//           },
+//           __dataIndex: index,
+//           __key: `${item.id}_${Date.now()}_${index}`
+//         };
+//       });
+//     }
+//   },
+//   { deep: true }
+// );
+// ============================================= 监听watch()导致页面假死 ===============================================
 
-//监听项目ID
-watch([() => props.isAdd], () => {}, { immediate: false, deep: true });
+// 监听项目ID
+watch([() => props.isAdd], () => {}, { deep: true, immediate: false });
+
 defineExpose({
   show: show,
 });

@@ -316,7 +316,7 @@ const getActions = (
 
       icon: "icon-xiazai",
       onClick: () => {
-        console.log(data);
+        //console.log(data);
         const extra = omit(data, [
           "transportProtocol",
           "protocolName",
@@ -605,9 +605,9 @@ const handleSearch = (e: any) => {
   // console.log(e, 'e')
   const newTerms = cloneDeep(e);
   if (newTerms.terms?.length) {
-    console.log(newTerms, "newTerms");
+    //console.log(newTerms, "newTerms");
     newTerms.terms.forEach((a: any) => {
-      console.log(a, "a");
+      //console.log(a, "a");
       a.terms = a.terms.map((b: any) => {
         if (b.column === "id$dev-instance") {
           return {
