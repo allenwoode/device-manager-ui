@@ -38,7 +38,8 @@ export const detail = (id: string, hiddenError?: any) => request.get<DeviceInsta
  * @param data 分页搜索数据
  * @returns
  */
-export const query = (data?: Record<string, any>) => request.post('/device-instance/_query', data)
+//export const query = (data?: Record<string, any>) => request.post('/device-instance/_query', data)
+export const query = (data?: Record<string, any>) => request.post('/device-instance/detail/_query', data)
 
 /**
  * 不分页查询设备

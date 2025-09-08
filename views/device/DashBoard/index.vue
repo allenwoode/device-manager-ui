@@ -184,7 +184,9 @@ const getProductData = () => {
         });
     // }
 };
+
 getProductData();
+
 /**
  * 获取设备数量
  */
@@ -195,13 +197,27 @@ const getDeviceData = () => {
                 deviceTotal.value = res.result;
             }
         });
-        deviceCount(encodeQuery({ terms: { state: 'online' } })).then((res) => {
+        deviceCount({
+            terms: [
+                {
+                    column: 'state',
+                    value: 'online',
+                },
+            ],
+        }).then((res) => {
             if (res.status == 200) {
                 deviceFooter.value[0].value = res.result;
                 deviceOnline.value = res.result;
             }
         });
-        deviceCount(encodeQuery({ terms: { state: 'offline' } })).then(
+
+        deviceCount({ 
+            terms: [
+                {
+                    column: 'state',
+                    value: 'offline',
+                },
+            ], }).then(
             (res) => {
                 if (res.status == 200) {
                     deviceFooter.value[1].value = res.result;
@@ -210,9 +226,11 @@ const getDeviceData = () => {
         );
     // }
 };
+
 getDeviceData();
+
 /**
- * 获取在线数量
+ * 获取当前在线数量
  */
 const getOnline = () => {
     const startTime = dayjs().subtract(0, 'days').startOf('day').format('YYYY-MM-DD HH:mm:ss');
@@ -482,7 +500,7 @@ const setDevMesChartOption = (
 };
 
 //今日设备消息量
-const getDevice = () => {
+const getDeviceMessage = () => {
   const startTime = dayjs().subtract(0, 'days').startOf('day').format('YYYY-MM-DD HH:mm:ss');
   const endTime = dayjs().format('YYYY-MM-DD HH:mm:ss');
 
@@ -609,7 +627,7 @@ const getEcharts = (data: any) => {
 
 getOnline();
 getYesterdayOnline()
-getDevice();
+getDeviceMessage();
 
 </script>
 <style lang="less" scoped>

@@ -6,7 +6,7 @@
         <div class="box-list">
             <div class="box-item">
                 <div class="label">{{ $t('components.DeviceCountCard.926510-2') }}</div>
-                <div class="value">{{ projectNum }}</div>
+                <div class="value">{{ productNum }}</div>
                 <img :src="home.product" alt="" />
             </div>
             <div class="box-item">
@@ -26,7 +26,7 @@ import { home } from '../../../assets'
 
 const { t: $t } = useI18n()
 const { jumpPage } = useMenuStore();
-const projectNum = ref(0);
+const productNum = ref(0);
 const deviceNum = ref(0);
 
 const menuPermission = useMenuStore().hasMenu;
@@ -40,9 +40,10 @@ const getData = () => {
     // 有设备菜单权限则获取数据
     menuPermission('device/Product') &&
     productCount({}).then((resp: any) => {
-            projectNum.value = resp.result;
+            productNum.value = resp.result;
         });
 };
+
 getData();
 </script>
 

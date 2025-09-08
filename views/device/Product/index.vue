@@ -602,12 +602,10 @@ const query = reactive({
 const saveRef = ref();
 
 const handleSearch = (e: any) => {
-  // console.log(e, 'e')
+  //console.log(e, 'e')
   const newTerms = cloneDeep(e);
   if (newTerms.terms?.length) {
-    //console.log(newTerms, "newTerms");
     newTerms.terms.forEach((a: any) => {
-      //console.log(a, "a");
       a.terms = a.terms.map((b: any) => {
         if (b.column === "id$dev-instance") {
           return {
@@ -648,6 +646,14 @@ const handleSearch = (e: any) => {
       });
     });
   }
+
+  // newTerms.terms = [
+  //   {
+  //           column: "id$in-dim-asset$org$product",
+  //           //termType: "dim-asset",
+  //           value: ["6481efa9-de3f-46a1-8ca2-39cb6c863360"]
+  //   }
+  // ];
 
   params.value = newTerms;
 };

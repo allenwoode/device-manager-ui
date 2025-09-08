@@ -1,17 +1,22 @@
 // 仪表盘数据
 import { request } from '@jetlinks-web/core'
 /**
- * 项目数量
+ * 产品数量
  */
-export const productCount = (data?:any) => request.post(`/device-product/_count`,data);
+//export const productCount = (data?:any) => request.post(`/device-product/_count`,data);
+export const productCount = (data?:any) => request.post(`/device/product/count`,data);
+
 /**
  * 设备数量
  */
-export const deviceCount = (data?:any) => request.get('/device/instance/_count',data);
+//export const deviceCount = (data?:any) => request.get('/device/instance/_count',data);
+export const deviceCount = (data?:any) => request.post('/device/instance/count',data);
+
 /**
  * 当前在线
  */
-export const dashboard = (data?:any) => request.post('/dashboard/_multi',data);
+export const dashboard = (data?:any) => request.post('/dashboard/_multi', data);
+
 /**
  * 地图数据
  */

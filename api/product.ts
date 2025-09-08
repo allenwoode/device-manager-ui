@@ -70,13 +70,15 @@ export const category = (data: any) => request.get('/device/category/_tree?pagin
    },
   ],
  }
- export const queryGatewayList = (data: any = defaultGatewayData) => request.post('/gateway/device/_query/no-paging', data)
+
+export const queryGatewayList = (data: any = defaultGatewayData) => request.post('/gateway/device/_query/no-paging', data)
 
  /**
   * 查询产品列表(分页)
   * @param data 查询条件
   */
- export const queryProductList = (data: any) => request.post('/device-product/_query', data)
+//export const queryProductList = (data: any) => request.post('/device-product/_query', data)
+export const queryProductList = (data: any) => request.post('/device-product/detail/_query', data)
 
  /**
  * 启用产品
