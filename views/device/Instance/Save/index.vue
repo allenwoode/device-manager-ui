@@ -135,7 +135,7 @@
 
 <script lang="ts" setup>
 import { queryNoPagingPost } from '../../../../api/product';
-import { isExists, update } from '../../../../api/instance';
+import { isExists, add } from '../../../../api/instance';
 import { onlyMessage } from '@jetlinks-web/utils';
 import { device} from "../../../../assets";
 import { useI18n } from 'vue-i18n';
@@ -230,7 +230,7 @@ const handleSave = () => {
             if (!obj.id) {
                 delete obj.id;
             }
-            const resp = await update(obj).finally(() => {
+            const resp = await add(obj).finally(() => {
                 loading.value = false;
             });
             if (resp.status === 200) {

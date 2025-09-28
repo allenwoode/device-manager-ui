@@ -16,13 +16,7 @@
                 <a-space>
                     <span style="font-size: 14px; color: rgba(0, 0, 0, 0.85)">
                         {{ $t('Detail.index.957187-0') }}
-                        <a-badge
-                            :status="
-                                statusMap.get(
-                                    instanceStore.current?.state?.value,
-                                )
-                            "
-                        />
+                        <a-badge :status="statusMap.get(instanceStore.current?.state?.value)"/>
                         {{ instanceStore.current?.state?.text }}
                     </span>
                     <j-permission-button
@@ -180,7 +174,9 @@ const list = ref([...initList]);
 const isRefresh = ref(false)
 
 const permissionStore = useAuthStore();
-const _arr = ['agent-device-gateway', 'agent-media-device-gateway']
+const _arr = ['agent-device-gateway', 'agent-media-device-gateway'];
+
+// 订阅设备状态
 const getStatus = (id: string) => {
     statusRef.value = wsClient.getWebSocket(
         `instance-editor-info-status-${id}`,
@@ -358,7 +354,7 @@ const getDetailFn = async () => {
         getStatus(String(_id));
         list.value = [...initList];
         getDetail();
-        // instanceStore.tabActiveKey = routerParams.params.value.tab || 'Info';
+        instanceStore.tabActiveKey = routerParams.params.value.tab || 'Info';
     }
     // else {
     //     instanceStore.tabActiveKey = routerParams.params.value.tab || 'Info';

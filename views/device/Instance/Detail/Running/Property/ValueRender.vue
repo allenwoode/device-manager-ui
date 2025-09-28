@@ -317,7 +317,6 @@ const getDetail = (_type: string) => {
             visible.value = true;
         }
     } else if (_type === 'obj') {
-        console.log('---> obj')
         flag = 'obj';
         _types.value = flag;
         visible.value = true;

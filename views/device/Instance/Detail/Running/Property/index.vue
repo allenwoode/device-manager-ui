@@ -235,10 +235,9 @@ const throttleFn = throttle(() => {
     valueChange(_list)
 }, 500)
 
+// 订阅设备属性更新
 const subscribeProperty = () => {
-    const id = `instance-info-property-${instanceStore.current.id}-${
-        instanceStore.current.productId
-    }-${dataSource.value.map((i: Record<string, any>) => i.id).join('-')}`;
+    const id = `instance-info-property-${instanceStore.current.id}-${instanceStore.current.productId}-${dataSource.value.map((i: Record<string, any>) => i.id).join('-')}`;
     const topic = `/dashboard/device/${instanceStore.current.productId}/properties/realTime`;
     subRef.value = wsClient.getWebSocket(id, topic, {
         deviceId: instanceStore.current.id,

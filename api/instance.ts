@@ -132,6 +132,13 @@ export const deviceExportPath = (productId: string, type: string) => (`${BASE_AP
 export const isExists = (id: string) => request.get(`/device-instance/${id}/exists`)
 
 /**
+ * 新增设备信息
+ * @param data 设备信息
+ * @returns
+ */
+export const add = (data: Partial<DeviceInstance>) => request.post(`/device-instance`, data)
+
+/**
  * 修改设备信息
  * @param data 设备信息
  * @returns

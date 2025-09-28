@@ -188,6 +188,7 @@ onMounted(() => {
         instanceStore.refresh(instanceStore.current.id);
     }
 });
+
 watch(
     () => instanceStore.current?.id,
     () => {
