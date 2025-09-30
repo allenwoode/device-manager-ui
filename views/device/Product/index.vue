@@ -78,11 +78,16 @@
               </slot>
             </template>
             <template #content>
-              <j-ellipsis style="width: calc(100% - 100px); margin-bottom: 18px"
-                ><span style="font-weight: 600; font-size: 16px">
+              <j-ellipsis style="width: calc(100% - 100px); margin-bottom: 4px">
+                <span style="font-weight: 600; font-size: 16px">
                   {{ slotProps.name }}
-                </span></j-ellipsis
-              >
+                </span>
+              </j-ellipsis>
+              <j-ellipsis style="margin-bottom: 18px">
+                <span style="font-weight: 300; font-size: 14px">
+                  {{ slotProps.id }}
+                </span>
+              </j-ellipsis>
               <a-row>
                 <a-col :span="12">
                   <div class="card-item-content-text">
@@ -602,7 +607,6 @@ const query = reactive({
 const saveRef = ref();
 
 const handleSearch = (e: any) => {
-  //console.log(e, 'e')
   const newTerms = cloneDeep(e);
   if (newTerms.terms?.length) {
     newTerms.terms.forEach((a: any) => {

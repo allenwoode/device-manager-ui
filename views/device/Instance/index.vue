@@ -70,14 +70,14 @@
                             />
                         </template>
                         <template #content>
-                            <j-ellipsis
-                                style="
-                                    width: calc(100% - 100px);
-                                    margin-bottom: 18px;
-                                "
-                            >
-                                <span style="font-size: 16px; font-weight: 600">
-                                    {{ slotProps.name }}
+                            <j-ellipsis style="width: calc(100% - 100px); margin-bottom: 4px">
+                                <span style="font-weight: 600; font-size: 16px">
+                                {{ slotProps.name }}
+                                </span>
+                            </j-ellipsis>
+                            <j-ellipsis style="margin-bottom: 18px">
+                                <span style="font-weight: 300; font-size: 14px">
+                                {{ slotProps.id }}
                                 </span>
                             </j-ellipsis>
                             <a-row>
