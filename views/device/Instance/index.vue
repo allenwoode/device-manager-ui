@@ -45,6 +45,7 @@
                         />
                     </a-space>
                 </template>
+
                 <template #card="slotProps">
                     <CardBox
                         :value="slotProps"
@@ -70,7 +71,7 @@
                             />
                         </template>
                         <template #content>
-                            <j-ellipsis style="width: calc(100% - 100px); margin-bottom: 4px">
+                            <j-ellipsis style="width: calc(100% - 100px); margin-bottom: 5px">
                                 <span style="font-weight: 600; font-size: 16px">
                                 {{ slotProps.name }}
                                 </span>
@@ -133,9 +134,7 @@
                 <template #createTime="slotProps">
                     <span>{{
                         slotProps?.createTime
-                            ? dayjs(slotProps.createTime).format(
-                                  'YYYY-MM-DD HH:mm:ss',
-                              )
+                            ? dayjs(slotProps.createTime).format('YYYY-MM-DD HH:mm:ss')
                             : ''
                     }}</span>
                 </template>
@@ -192,6 +191,8 @@
     />
     <Save
         v-if="visible"
+        :title="title"
+        :isAdd="isAdd"
         :data="current"
         @close="visible = false"
         @save="saveBtn"
@@ -239,8 +240,12 @@ const params = ref<Record<string, any>>({});
 const _selectedRowKeys = ref<string[]>([]);
 const importVisible = ref<boolean>(false);
 const exportVisible = ref<boolean>(false);
+
+const title = ref<string>("");
+const isAdd = ref<number>(0);
 const visible = ref<boolean>(false);
 const current = ref<Record<string, any>>({});
+
 const operationVisible = ref<boolean>(false);
 const api = ref<string>('');
 const type = ref<string>('');
@@ -506,6 +511,8 @@ const handleParams = (config: Record<string, any>) => {
  * 新增
  */
 const handleAdd = () => {
+    title.value = $t('Save.index.902471-1');
+    isAdd.value = 1;
     visible.value = true;
     current.value = {};
 };
@@ -542,6 +549,8 @@ const getActions = (
             },
             icon: 'EditOutlined',
             onClick: () => {
+                title.value = $t('Save.index.902471-0');
+                isAdd.value = 2;
                 visible.value = true;
                 current.value = data;
             },
@@ -836,6 +845,7 @@ const dealSearchValue = (item: any) => {
     });
     return value;
 };
+
 const handleSearch = (_params: any) => {
     // params.value = _params;
     const newParams = (_params?.terms as any[])?.map((item1) => {

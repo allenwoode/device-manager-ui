@@ -1,10 +1,11 @@
+<!-- 新增、编辑设备 -->
 <template>
     <a-modal
+        :title="props.title"
         :maskClosable="false"
         width="650px"
         :visible="true"
-        :title="!!data?.id ? $t('Save.index.902471-0') : $t('Save.index.902471-1')"
-        @ok="handleSave"
+        @ok="submitData"
         @cancel="handleCancel"
         :confirmLoading="loading"
     >
@@ -135,7 +136,7 @@
 
 <script lang="ts" setup>
 import { queryNoPagingPost } from '../../../../api/product';
-import { isExists, add } from '../../../../api/instance';
+import { isExists, add, update } from '../../../../api/instance';
 import { onlyMessage } from '@jetlinks-web/utils';
 import { device} from "../../../../assets";
 import { useI18n } from 'vue-i18n';
@@ -144,12 +145,27 @@ import { isInput } from '@device/utils/utils';
 const { t: $t } = useI18n();
 
 const emit = defineEmits(['close', 'save']);
+
 const props = defineProps({
+    title: {
+        type: String,
+        default: '',
+    },
+    isAdd: {
+        type: Number,
+        default: 0,
+    },
     data: {
         type: Object,
         default: undefined,
     },
 });
+// const props = defineProps({
+//     data: {
+//         type: Object,
+//         default: undefined,
+//     },
+// });
 const productList = ref<Record<string, any>[]>([]);
 const loading = ref<boolean>(false);
 
@@ -221,7 +237,7 @@ const handleCancel = () => {
     formRef.value.resetFields();
 };
 
-const handleSave = () => {
+const submitData = () => {
     formRef.value
         .validate()
         .then(async (_data: any) => {
@@ -230,13 +246,29 @@ const handleSave = () => {
             if (!obj.id) {
                 delete obj.id;
             }
-            const resp = await add(obj).finally(() => {
-                loading.value = false;
-            });
-            if (resp.status === 200) {
-                onlyMessage($t('Save.index.902471-16'));
-                emit('save');
-                formRef.value.resetFields();
+
+            if (props.isAdd === 1) {
+                const resp = await add(obj).finally(() => {
+                    loading.value = false;
+                });
+                if (resp.status === 200) {
+                    onlyMessage($t('Save.index.912481-22'));
+                    emit('save');
+                    formRef.value.resetFields();
+                } else {
+                    onlyMessage($t('Save.index.912481-23'), 'error');
+                }
+            } else if (props.isAdd === 2) {
+                const resp = await update(obj).finally(() => {
+                    loading.value = false;
+                });
+                if (resp.status === 200) {
+                    onlyMessage($t('Save.index.912481-22'));
+                    emit('save');
+                    formRef.value.resetFields();
+                } else {
+                    onlyMessage($t('Save.index.912481-23'), 'error');
+                }
             }
         })
         .catch((err: any) => {

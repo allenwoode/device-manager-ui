@@ -78,7 +78,7 @@
               </slot>
             </template>
             <template #content>
-              <j-ellipsis style="width: calc(100% - 100px); margin-bottom: 4px">
+              <j-ellipsis style="width: calc(100% - 100px); margin-bottom: 5px">
                 <span style="font-weight: 600; font-size: 16px">
                   {{ slotProps.name }}
                 </span>
@@ -321,7 +321,6 @@ const getActions = (
 
       icon: "icon-xiazai",
       onClick: () => {
-        //console.log(data);
         const extra = omit(data, [
           "transportProtocol",
           "protocolName",

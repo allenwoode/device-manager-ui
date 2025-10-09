@@ -1,7 +1,14 @@
 <!-- 新增、编辑产品 -->
 <template>
-    <a-modal :title="props.title" :maskClosable="false" destroy-on-close v-model:visible="visible" @ok="submitData"
-        @cancel="close" :okText="$t('Save.index.912481-0')" :cancelText="$t('Save.index.912481-1')" width="650px"
+    <a-modal 
+        :title="props.title" 
+        :maskClosable="false" 
+        destroy-on-close 
+        v-model:visible="visible" 
+        @ok="submitData"
+        @cancel="close" 
+        :okText="$t('Save.index.912481-0')" 
+        :cancelText="$t('Save.index.912481-1')" width="650px"
         :confirmLoading="loading">
         <div style="margin-top: 10px">
             <a-form layout="vertical" :model="form" :rules="rules" ref="formRef">

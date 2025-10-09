@@ -143,7 +143,8 @@ export const add = (data: Partial<DeviceInstance>) => request.post(`/device-inst
  * @param data 设备信息
  * @returns
  */
-export const update = (data: Partial<DeviceInstance>) => data.id ? request.patch(`/device-instance`, data) : request.post(`/device-instance`, data)
+//export const update = (data: Partial<DeviceInstance>) => data.id ? request.patch(`/device-instance`, data) : request.post(`/device-instance`, data)
+export const update = (data: Partial<DeviceInstance>) => request.put(`/device-instance/${data.id}`, data)
 
 /**
  * 修改设备信息

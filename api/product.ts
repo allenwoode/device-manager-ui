@@ -122,6 +122,7 @@ export const deleteProduct = (id: string) => request.remove(`/device-product/${i
  * @param id 产品ID
  */
  export const queryProductId = (id: string) => request.get(`/device-product/${id}/exists`)
+ 
 /**
  * 保存产品
  * @param data 产品信息
