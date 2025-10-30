@@ -4,7 +4,6 @@ import i18n from "@/locales";
 
 const MODULE_CODE = 'device'
 
-
 const getAsyncRoutesMap = () => {
     const modules = {}
     Object.keys(routerModules).forEach(item => {
