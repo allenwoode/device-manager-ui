@@ -113,6 +113,36 @@
                     </a-select>
                 </a-form-item>
                 <a-form-item
+                    name="orgId"
+                    :rules="[
+                        {
+                            required: false,
+                            message: $t('Save.index.902471-8'),
+                        },
+                    ]"
+                >
+                    <template #label>
+                        <span>{{ $t('Save.index.902471-17') }}
+                        </span>
+                    </template>
+                    <a-select
+                        showSearch
+                        v-model:value="modelRef.orgId"
+                        :disabled="!!data?.id"
+                        :placeholder="$t('Save.index.902471-18')"
+                        option-filter-prop="label"
+                        @change="onOrgChange"
+                    >
+                        <a-select-option
+                            :value="item.id"
+                            v-for="item in organizationList"
+                            :key="item.id"
+                            :label="item.name"
+                            >{{ item.name }}</a-select-option
+                        >
+                    </a-select>
+                </a-form-item>
+                <a-form-item
                     :label="$t('Save.index.902471-12')"
                     name="describe"
                     :rules="[
@@ -135,12 +165,15 @@
 </template>
 
 <script lang="ts" setup>
+
 import { queryNoPagingPost } from '../../../../api/product';
+import { getTreeData_api } from '../../../../api/department';
 import { isExists, add, update } from '../../../../api/instance';
 import { onlyMessage } from '@jetlinks-web/utils';
 import { device} from "../../../../assets";
 import { useI18n } from 'vue-i18n';
 import { isInput } from '@device/utils/utils';
+import { get } from 'lodash-es';
 
 const { t: $t } = useI18n();
 
@@ -167,6 +200,7 @@ const props = defineProps({
 //     },
 // });
 const productList = ref<Record<string, any>[]>([]);
+const organizationList = ref<Record<string, any>[]>([]);
 const loading = ref<boolean>(false);
 
 const formRef = ref();
@@ -174,6 +208,7 @@ const formRef = ref();
 const modelRef = reactive({
     productId: undefined,
     id: undefined,
+    orgId: undefined,
     name: '',
     describe: '',
     photoUrl: props.data.devicePhotoUrl || device.deviceCard,
@@ -203,6 +238,13 @@ const onChange = (val: any) => {
   }
 }
 
+const onOrgChange = (val: any) => {
+  organizationList.value.find(i => i.id === val)
+//   if(!props.data?.id){
+//     modelRef.photoUrl = item?.photoUrl || device.deviceCard
+//   }
+}
+
 watch(
     () => props.data,
     (newValue) => {
@@ -223,6 +265,25 @@ watch(
         }).then((resp) => {
             if (resp.status === 200) {
                 productList.value = resp.result as Record<string, any>[];
+            }
+        });
+        Object.assign(modelRef, newValue);
+        // description 和 describe 处理
+        modelRef.describe = newValue?.describe || newValue?.description
+    },
+    { immediate: true, deep: true },
+);
+
+watch(
+    () => props.data,
+    (newValue) => {
+        getTreeData_api({
+            paging: false,
+            sorts: [{ name: 'sortIndex', order: 'asc' }],
+            terms: [],
+        }).then((resp) => {
+            if (resp.status === 200) {
+                organizationList.value = resp.result as Record<string, any>[];
             }
         });
         Object.assign(modelRef, newValue);

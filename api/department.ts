@@ -20,3 +20,6 @@ export const bindDeviceOrProductList_api = (type: 'device' | 'product', data: ob
 export const unBindDeviceOrProduct_api = (type: 'device' | 'product', data: object) => request.post(`/assets/unbind/${type}`, data);
 // 批量更新权限
 export const updatePermission_api = (type: 'device' | 'product', parentId: string, data: object) => request.put(`/assets/permission/${type}/org/${parentId}/_batch`, data);
+
+// 获取部门数据
+export const getTreeData_api = (data: object) => request.post(`/organization/_all/tree`, data);
