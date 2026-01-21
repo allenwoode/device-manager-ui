@@ -6,45 +6,75 @@
             @search="handleSearch"
         />
         <FullPage>
-            <JProTable
-                ref="instanceRef"
-                :columns="columns"
-                :request="query"
-                :defaultParams="{
-                    sorts: [{ name: 'createTime', order: 'desc' }, { name: 'name', order: 'desc'}],
-                }"
-                :rowSelection="
-                    isCheck
-                        ? {
-                              selectedRowKeys: _selectedRowKeys,
-                              onSelect: onSelectChange,
-                              onSelectAll: selectAll,
-                              onSelectNone: () => (_selectedRowKeys = []),
-                          }
-                        : false
-                "
-                :params="params"
-                modeValue="CARD"
-            >
-                <template #headerLeftRender>
-                    <a-space>
-                        <j-permission-button
-                            type="primary"
-                            @click="handleAdd"
-                            hasPermission="device/Instance:add"
-                        >
-                            <template #icon
-                                ><AIcon type="PlusOutlined"
-                            /></template>
-                            {{ $t('Instance.index.133466-0') }}
-                        </j-permission-button>
-                        <BatchDropdown
-                            v-model:isCheck="isCheck"
-                            :actions="batchActions"
-                            @change="onCheckChange"
-                        />
-                    </a-space>
-                </template>
+            <a-row class="instance-split">
+                <a-col :span="6" class="instance-left">
+                    <div style="padding-right: 12px; position: relative;">
+                        <div class="product-list">
+                            <a-card
+                                v-for="item in productList"
+                                :key="item.id"
+                                :class="['product-card', { active: selectedProduct === item.id || selectedProducts.includes(item.id) }]"
+                                hoverable
+                            >
+                                <div class="product-card-inner" @click="selectedProduct = item.id">
+                                    <img class="product-pic" :src="item.photoUrl || device.deviceCard" alt="" />
+                                    <div class="product-meta">
+                                        <div class="product-name">{{ item.name }}</div>
+                                        <div class="product-id">{{ item.id }}</div>
+                                    </div>
+                                </div>
+                                <div class="product-card-checkbox">
+                                    <a-checkbox
+                                        :checked="selectedProducts.includes(item.id)"
+                                        @change="(e) => toggleProductSelection(item.id, e.target.checked)"
+                                    />
+                                </div>
+                            </a-card>
+                            
+                        </div>
+                    </div>
+                </a-col>
+
+                <a-col :span="18" class="instance-right">
+                    <JProTable
+                        ref="instanceRef"
+                        :columns="columns"
+                        :request="query"
+                        :defaultParams="{
+                            sorts: [{ name: 'createTime', order: 'desc' }, { name: 'name', order: 'desc'}],
+                        }"
+                        :rowSelection="
+                            isCheck
+                                ? {
+                                      selectedRowKeys: _selectedRowKeys,
+                                      onSelect: onSelectChange,
+                                      onSelectAll: selectAll,
+                                      onSelectNone: () => (_selectedRowKeys = []),
+                                  }
+                                : false
+                        "
+                        :params="params"
+                        modeValue="CARD"
+                    >
+                        <template #headerLeftRender>
+                            <a-space>
+                                <j-permission-button
+                                    type="primary"
+                                    @click="handleAdd"
+                                    hasPermission="device/Instance:add"
+                                >
+                                    <template #icon
+                                        ><AIcon type="PlusOutlined"
+                                    /></template>
+                                    {{ $t('Instance.index.133466-0') }}
+                                </j-permission-button>
+                                <BatchDropdown
+                                    v-model:isCheck="isCheck"
+                                    :actions="batchActions"
+                                    @change="onCheckChange"
+                                />
+                            </a-space>
+                        </template>
 
                 <template #card="slotProps">
                     <CardBox
@@ -120,6 +150,7 @@
                         </template>
                     </CardBox>
                 </template>
+
                 <template #state="slotProps">
                     <j-badge-status
                         :status="slotProps.state?.value"
@@ -168,6 +199,9 @@
                     </a-space>
                 </template>
             </JProTable>
+
+                            </a-col>
+            </a-row>
         </FullPage>
     </j-page-container>
     <Import
@@ -236,6 +270,10 @@ import { useI18n } from 'vue-i18n';
 const { t: $t } = useI18n();
 
 const instanceRef = ref<Record<string, any>>({});
+const productList = ref<Record<string, any>[]>([]);
+const selectedProduct = ref<string | undefined>(undefined);
+const selectedProducts = ref<string[]>([]);
+const folded = ref<boolean>(false);
 const params = ref<Record<string, any>>({});
 const _selectedRowKeys = ref<string[]>([]);
 const importVisible = ref<boolean>(false);
@@ -249,6 +287,15 @@ const current = ref<Record<string, any>>({});
 const operationVisible = ref<boolean>(false);
 const api = ref<string>('');
 const type = ref<string>('');
+
+const toggleProductSelection = (id: string, checked: boolean) => {
+    const idx = selectedProducts.value.indexOf(id);
+    if (checked) {
+        if (idx === -1) selectedProducts.value.push(id);
+    } else {
+        if (idx !== -1) selectedProducts.value.splice(idx, 1);
+    }
+};
 const isCheck = ref<boolean>(false);
 const routerParams = useRouterParams();
 const menuStory = useMenuStore();
@@ -911,6 +958,38 @@ const deleteDevice = async () => {
 };
 
 onMounted(() => {
+    // load products for left filter
+    queryNoPagingPost({ paging: false }).then((resp: any) => {
+        if (resp.status === 200) {
+            productList.value = resp.result as Record<string, any>[];
+        }
+    });
+
+    // react to product selection or multiple product selection
+    const applyProductFilter = () => {
+        if (selectedProducts.value && selectedProducts.value.length) {
+            params.value = { terms: [{ terms: [{ column: 'productId', termType: 'in', value: selectedProducts.value }] }] };
+        } else if (selectedProduct.value) {
+            params.value = { terms: [{ terms: [{ column: 'productId', termType: 'eq', value: selectedProduct.value }] }] };
+        } else {
+            params.value = {};
+        }
+        instanceRef.value?.reload();
+    };
+
+    watch(() => selectedProduct.value, () => {
+        // clear multi selection when single product clicked
+        selectedProducts.value = [];
+        applyProductFilter();
+    });
+
+    watch(() => selectedProducts.value.slice(), () => {
+        // clear single selection when multi selected
+        if (selectedProducts.value && selectedProducts.value.length) {
+            selectedProduct.value = undefined;
+        }
+        applyProductFilter();
+    });
     if (routerParams.params.value?.type === 'add') {
         handleAdd();
     }
@@ -959,3 +1038,72 @@ onMounted(() => {
     }
 });
 </script>
+
+<style scoped>
+.product-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.product-card {
+    cursor: pointer;
+}
+.product-card.active {
+    background: #f0f7ff;
+    border-color: #1890ff;
+}
+
+.product-card-inner {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+.product-card-checkbox {
+    position: absolute;
+    right: 8px;
+    top: 8px;
+}
+.product-pic {
+    width: 40px;
+    height: 40px;
+    object-fit: cover;
+    border-radius: 4px;
+}
+.product-meta {
+    display: flex;
+    flex-direction: column;
+}
+.product-name {
+    font-weight: 600;
+}
+.product-id {
+    font-size: 12px;
+    color: #888;
+}
+
+
+.instance-split {
+    display: flex;
+    align-items: stretch;
+}
+.instance-left {
+    display: flex;
+    flex-direction: column;
+    flex: 0 0 260px;
+    width: 260px;
+}
+.instance-left.collapsed {
+    flex: 0 0 260px;
+    width: 260px;
+}
+.instance-right {
+    min-width: 0;
+    flex: 1 1 auto;
+    overflow: auto;
+    max-height: calc(100vh - 140px);
+}
+.product-list {
+    overflow: auto;
+    max-height: calc(100vh - 200px);
+}
+</style>
