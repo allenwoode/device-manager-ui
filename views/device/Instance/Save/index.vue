@@ -116,8 +116,8 @@
                     name="orgId"
                     :rules="[
                         {
-                            required: false,
-                            message: $t('Save.index.902471-8'),
+                            required: true,
+                            message: $t('Save.index.902471-18'),
                         },
                     ]"
                 >
@@ -131,7 +131,6 @@
                         :disabled="!!data?.id"
                         :placeholder="$t('Save.index.902471-18')"
                         option-filter-prop="label"
-                        @change="onOrgChange"
                     >
                         <a-select-option
                             :value="item.id"
@@ -173,7 +172,7 @@ import { onlyMessage } from '@jetlinks-web/utils';
 import { device} from "../../../../assets";
 import { useI18n } from 'vue-i18n';
 import { isInput } from '@device/utils/utils';
-import { get } from 'lodash-es';
+//import { get } from 'lodash-es';
 
 const { t: $t } = useI18n();
 
@@ -236,13 +235,6 @@ const onChange = (val: any) => {
   if(!props.data?.id){
     modelRef.photoUrl = item?.photoUrl || device.deviceCard
   }
-}
-
-const onOrgChange = (val: any) => {
-  organizationList.value.find(i => i.id === val)
-//   if(!props.data?.id){
-//     modelRef.photoUrl = item?.photoUrl || device.deviceCard
-//   }
 }
 
 watch(

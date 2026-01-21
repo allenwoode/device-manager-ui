@@ -7,7 +7,7 @@
         @cancel="handleCancel"
     >
         <div style="margin-top: 10px">
-            <a-form :layout="'vertical'">
+            <a-form :layout="'vertical'" ref="formRef">
                 <a-row>
                     <a-col span="24">
                         <a-form-item :label="$t('Import.index.103541-1')" required>
@@ -51,6 +51,7 @@
 
 <script lang="ts" setup>
 import { queryNoPagingPost } from '../../../../api/product';
+import { ref, reactive, onMounted } from 'vue';
 
 const emit = defineEmits(['close', 'save']);
 const productList = ref<Record<string, any>[]>([]);
@@ -64,12 +65,11 @@ const modelRef = reactive({
     },
 });
 
-
 const handleCancel = () => {
     emit('close');
 };
 
-const handleSave = () => {
+const handleSave = async () => {
     emit('close');
     emit('save');
 };

@@ -100,13 +100,14 @@ export const batchDeleteDevice = (data: string[]) => request.put(`/device-instan
 export const deviceTemplateDownload = (productId: string, type: string) => `${BASE_API}/device-instance/${productId}/template.${type}`
 
 export const templateDownload = (productId: string, type: string) => request.get(`/device-instance/${productId}/template.${type}`, {}, { responseType: 'blob' })
+
 /**
  * 设备导入
  * @param productId 产品id
  * @param type 文件类型
  * @returns
  */
-export const deviceImport = (productId: string, fileUrl: string, autoDeploy: boolean) => `${BASE_API}/device-instance/${productId}/import/_withlog?fileUrl=${fileUrl}&autoDeploy=${autoDeploy}&${TOKEN_KEY_URL}=${getToken()}`
+export const deviceImport = (productId: string, fileUrl: string, autoDeploy: boolean, orgId: string) => `${BASE_API}/device-instance/${productId}/import/_withlog?fileUrl=${fileUrl}&autoDeploy=${autoDeploy}&orgId=${orgId}&${TOKEN_KEY_URL}=${getToken()}`
 
 /**
  * 插件设备导入
@@ -114,7 +115,7 @@ export const deviceImport = (productId: string, fileUrl: string, autoDeploy: boo
  * @param type 文件类型
  * @returns
  */
-export const pluginDeviceImport = (productId: string, fileUrl: string, autoDeploy: boolean) => `${BASE_API}/device/instance/plugin/${productId}/import/_withlog?fileUrl=${fileUrl}&autoDeploy=${autoDeploy}&${TOKEN_KEY_URL}=${getToken()}`
+export const pluginDeviceImport = (productId: string, fileUrl: string, autoDeploy: boolean) => `${BASE_API}/device/instance/plugin/${productId}?fileUrl=${fileUrl}&autoDeploy=${autoDeploy}&${TOKEN_KEY_URL}=${getToken()}`
 
 /**
  * 设备导出

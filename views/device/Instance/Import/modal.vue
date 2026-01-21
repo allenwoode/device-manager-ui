@@ -140,6 +140,7 @@ const pluginChange = (options: any[]) => {
   deviceList.value = options
 }
 
+// save 方法
 const save = () => {
   if (importData.type === 'file') {
     cancel()

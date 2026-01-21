@@ -1,6 +1,6 @@
 <template>
     <div class="file">
-        <a-form layout="vertical">
+        <a-form layout="vertical" :model="modelRef" ref="formRef">
             <a-form-item>
                 <template #label>
                     <div>
@@ -36,6 +36,35 @@
                     >{{ $t('Import.file.677857-4') }}</a-checkbox
                 >
             </div>
+
+            <a-form-item
+                name="orgId"
+                :rules="[
+                        {
+                            required: true,
+                            message: $t('Save.index.902471-18'),
+                        },
+                    ]"
+                >
+                    <template #label>
+                        <span>{{ $t('Save.index.902471-17') }}
+                        </span>
+                    </template>
+                    <a-select
+                        v-model:value="modelRef.orgId"
+                        showSearch
+                        :placeholder="$t('Save.index.902471-18')"
+                        option-filter-prop="label"
+                    >
+                        <a-select-option
+                            :value="item.id"
+                            v-for="item in organizationList"
+                            :key="item.id"
+                            :label="item.name"
+                            >{{ item.name }}</a-select-option
+                        >
+                    </a-select>
+            </a-form-item>
             <div v-if="importLoading" class="result">
                 <div v-if="flag">
                     <a-spin size="small" style="margin-right: 10px" />{{ $t('Import.file.677857-5') }}
@@ -72,13 +101,15 @@
 </template>
 
 <script setup lang='ts' name='DeviceImportFile'>
-import {inject,Ref} from 'vue'
+import { inject, Ref, ref, reactive, watch } from 'vue'
 import { FileStaticPath } from '@/api/comm';
 import { TOKEN_KEY } from '@jetlinks-web/constants';
 import { LocalStore, onlyMessage, downloadFileByUrl } from '@jetlinks-web/utils';
 import { deviceImport, pluginDeviceImport, templateDownload } from '../../../../api/instance';
 import { EventSourcePolyfill } from 'event-source-polyfill';
 import { useI18n } from 'vue-i18n';
+
+import { getTreeData_api } from '../../../../api/department';
 
 const { t: $t } = useI18n();
 const props = defineProps({
@@ -94,12 +125,15 @@ const props = defineProps({
 
 const modelRef = reactive({
     product: props.product,
+    orgId: '' as string,
     upload: [],
     file: {
         fileType: 'xlsx',
         autoDeploy: false,
     },
 });
+
+const formRef = ref<any>(null);
 
 const importLoading = ref<boolean>(false);
 const flag = inject("flag") as Ref<boolean>;
@@ -108,6 +142,25 @@ const count = ref<number>(0);
 const errCount = ref<number>(0);
 const errMessage = ref<string>('');
 const disabled = ref(false);
+
+const organizationList = ref<Record<string, any>[]>([]);
+
+watch(
+    () => props,
+    (newValue) => {
+        getTreeData_api({
+            paging: false,
+            sorts: [{ name: 'sortIndex', order: 'asc' }],
+            terms: [],
+        }).then((resp) => {
+            if (resp.status === 200) {
+                organizationList.value = resp.result as Record<string, any>[];
+            }
+        });
+        Object.assign(modelRef, newValue);
+    },
+    { immediate: true, deep: true },
+);
 
 const downFile = async (type: string) => {
     const res: any = await templateDownload(props.product!, type);
@@ -152,7 +205,7 @@ const submitData = async (fileUrl: string) => {
         const source = new EventSourcePolyfill(
             props.accessProvider === 'plugin_gateway'
             ? pluginDeviceImport(props.product!, fileUrl, autoDeploy)
-            : deviceImport(props.product!, fileUrl, autoDeploy),
+            : deviceImport(props.product!, fileUrl, autoDeploy, modelRef.orgId),
         );
         source.onmessage = (e: any) => {
             const res = JSON.parse(e.data);
@@ -186,8 +239,17 @@ const uploadChange = async (info: Record<string, any>) => {
     disabled.value = true;
     if (info.file.status === 'done') {
         const resp: any = info.file.response?.result || { accessUrl: '' };
+        if (formRef.value) {
+            try {
+                await formRef.value.validate();
+            } catch (err) {
+                // validation failed, stop submission
+                disabled.value = false;
+                return;
+            }
+        }
         await submitData(resp?.accessUrl || '');
-    }else{
+    } else {
         disabled.value = false;
     }
 };
