@@ -980,7 +980,7 @@ const deleteDevice = async () => {
 
 onMounted(() => {
     // load products for left filter
-    queryNoPagingPost({ paging: false }).then((resp: any) => {
+    queryNoPagingPost({ paging: false, sorts: [{ name: 'createTime', order: 'desc' }]}).then((resp: any) => {
         if (resp.status === 200) {
             productList.value = resp.result as Record<string, any>[];
             filteredProducts.value = productList.value.slice();
@@ -1009,7 +1009,7 @@ onMounted(() => {
     watch(value, (v) => {
         onSearch(v as unknown as string);
     });
-    
+
     watch(() => selectedProducts.value.slice(), () => {
         // clear single selection when multi selected
         if (selectedProducts.value && selectedProducts.value.length) {

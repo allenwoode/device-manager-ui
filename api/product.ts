@@ -8,7 +8,7 @@ import {BASE_API} from "@jetlinks-web/constants";
  * @param data 查询条件
  * @returns
  */
-export const queryNoPagingPost = (data: any) => request.post(`/device-product/_query/no-paging?paging=false`, data)
+export const queryNoPagingPost = (data: any) => request.post(`/device-product/query/no-paging?paging=false`, data)
 
 /**
  * 导入第三方物模型
