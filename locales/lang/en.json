@@ -922,6 +922,8 @@
     "Instance.index.133466-36": "The enabled device cannot be deleted. Are you sure to delete the selected disabled device?",
     "Instance.index.133466-37": "Batch disable devices",
     "Instance.index.133466-38": "Are you sure to disable the selected device?",
+    "Instance.index.133466-39": "Product name",
+    "Instance.index.133466-40": "Please enter product name",
     "Save.index.902471-0": "edit",
     "Save.index.902471-1": "Add",
     "Save.index.902471-2": "Please enter English or numbers or - or_",

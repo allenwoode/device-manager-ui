@@ -6,37 +6,40 @@
             @search="handleSearch"
         />
         <FullPage>
-            <a-row class="instance-split">
-                <a-col :span="6" class="instance-left">
-                    <div style="padding-right: 12px; position: relative;">
-                        <div class="product-list">
-                            <a-card
-                                v-for="item in productList"
-                                :key="item.id"
-                                :class="['product-card', { active: selectedProduct === item.id || selectedProducts.includes(item.id) }]"
-                                hoverable
-                            >
-                                <div class="product-card-inner" @click="selectedProduct = item.id">
-                                    <img class="product-pic" :src="item.photoUrl || device.deviceCard" alt="" />
-                                    <div class="product-meta">
-                                        <div class="product-name">{{ item.name }}</div>
-                                        <div class="product-id">{{ item.id }}</div>
-                                    </div>
-                                </div>
-                                <div class="product-card-checkbox">
-                                    <a-checkbox
-                                        :checked="selectedProducts.includes(item.id)"
-                                        @change="(e) => toggleProductSelection(item.id, e.target.checked)"
-                                    />
-                                </div>
-                            </a-card>
-                            
-                        </div>
-                    </div>
-                </a-col>
 
-                <a-col :span="18" class="instance-right">
-                    <JProTable
+    <div class="property-box">
+        <div class="property-box-left">
+                        <div class="product-nav">
+                            <div class="product-list">
+                                <div class="list-render-sticky">
+                                        <div class="product-list-header">{{$t('Instance.index.133466-39')}}<span class="product-count">({{ filteredProducts.length }})</span></div>
+                                </div>
+                                <a-input-search
+                                    v-model:value="value"
+                                    :placeholder="$t('Instance.index.133466-40')"
+                                    style="width: 240px; margin-bottom: 10px"
+                                    @search="onSearch"
+                                    :allowClear="true"
+                                />
+                                <a-card
+                                    v-for="item in filteredProducts"
+                                    :key="item.id"
+                                    :class="['product-card', { active: selectedProduct === item.id || selectedProducts.includes(item.id) }]"
+                                    hoverable
+                                >
+                                    <div class="product-card-inner" @click="selectedProduct = item.id">
+                                        <img class="product-pic" :src="item.photoUrl || device.deviceCard" alt="" />
+                                        <div class="product-meta">
+                                            <div class="product-name">{{ item.name }}</div>
+                                        </div>
+                                    </div>
+                                </a-card>
+                            </div>
+                        </div>
+        </div>
+  
+        <div class="property-box-right">
+            <JProTable
                         ref="instanceRef"
                         :columns="columns"
                         :request="query"
@@ -162,6 +165,7 @@
                         }"
                     />
                 </template>
+
                 <template #createTime="slotProps">
                     <span>{{
                         slotProps?.createTime
@@ -169,6 +173,7 @@
                             : ''
                     }}</span>
                 </template>
+
                 <template #action="slotProps">
                     <a-space :size="16">
                         <template
@@ -198,10 +203,10 @@
                         </template>
                     </a-space>
                 </template>
+                
             </JProTable>
-
-                            </a-col>
-            </a-row>
+        </div>
+        </div>
         </FullPage>
     </j-page-container>
     <Import
@@ -271,9 +276,11 @@ const { t: $t } = useI18n();
 
 const instanceRef = ref<Record<string, any>>({});
 const productList = ref<Record<string, any>[]>([]);
+const value = ref<string>('');
+const filteredProducts = ref<Record<string, any>[]>([]);
 const selectedProduct = ref<string | undefined>(undefined);
 const selectedProducts = ref<string[]>([]);
-const folded = ref<boolean>(false);
+
 const params = ref<Record<string, any>>({});
 const _selectedRowKeys = ref<string[]>([]);
 const importVisible = ref<boolean>(false);
@@ -288,14 +295,28 @@ const operationVisible = ref<boolean>(false);
 const api = ref<string>('');
 const type = ref<string>('');
 
-const toggleProductSelection = (id: string, checked: boolean) => {
-    const idx = selectedProducts.value.indexOf(id);
-    if (checked) {
-        if (idx === -1) selectedProducts.value.push(id);
-    } else {
-        if (idx !== -1) selectedProducts.value.splice(idx, 1);
+const onSearch = (v?: string) => {
+    const q = (v ?? value.value ?? '').toString().trim().toLowerCase();
+    if (!q) {
+        filteredProducts.value = productList.value.slice();
+        return;
     }
+    filteredProducts.value = (productList.value || []).filter((p: any) => {
+        const name = (p.name || '').toString().toLowerCase();
+        const id = (p.id || '').toString().toLowerCase();
+        return name.includes(q) || id.includes(q);
+    });
 };
+
+// const toggleProductSelection = (id: string, checked: boolean) => {
+//     const idx = selectedProducts.value.indexOf(id);
+//     if (checked) {
+//         if (idx === -1) selectedProducts.value.push(id);
+//     } else {
+//         if (idx !== -1) selectedProducts.value.splice(idx, 1);
+//     }
+// };
+
 const isCheck = ref<boolean>(false);
 const routerParams = useRouterParams();
 const menuStory = useMenuStore();
@@ -962,6 +983,7 @@ onMounted(() => {
     queryNoPagingPost({ paging: false }).then((resp: any) => {
         if (resp.status === 200) {
             productList.value = resp.result as Record<string, any>[];
+            filteredProducts.value = productList.value.slice();
         }
     });
 
@@ -982,7 +1004,12 @@ onMounted(() => {
         selectedProducts.value = [];
         applyProductFilter();
     });
-
+    
+    // live filter when search value changes
+    watch(value, (v) => {
+        onSearch(v as unknown as string);
+    });
+    
     watch(() => selectedProducts.value.slice(), () => {
         // clear single selection when multi selected
         if (selectedProducts.value && selectedProducts.value.length) {
@@ -1040,10 +1067,26 @@ onMounted(() => {
 </script>
 
 <style scoped>
+    
+.property-box {
+    display: flex;
+    .property-box-left {
+        width: 260px;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        max-height: calc(100vh - 140px);
+    }
+    .property-box-right {
+        flex: 1;
+    }
+}
+
 .product-list {
     display: flex;
     flex-direction: column;
     gap: 8px;
+
 }
 .product-card {
     cursor: pointer;
@@ -1081,6 +1124,18 @@ onMounted(() => {
     color: #888;
 }
 
+.list-render-sticky {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    background: #fff;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(0,0,0,0.04);
+}
+.product-list-header {
+    font-weight: 600;
+    padding-left: 8px;
+}
 
 .instance-split {
     display: flex;
@@ -1089,13 +1144,8 @@ onMounted(() => {
 .instance-left {
     display: flex;
     flex-direction: column;
-    flex: 0 0 260px;
-    width: 260px;
 }
-.instance-left.collapsed {
-    flex: 0 0 260px;
-    width: 260px;
-}
+
 .instance-right {
     min-width: 0;
     flex: 1 1 auto;
@@ -1103,7 +1153,15 @@ onMounted(() => {
     max-height: calc(100vh - 140px);
 }
 .product-list {
-    overflow: auto;
-    max-height: calc(100vh - 200px);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    max-height: calc(100vh - 180px);
+}
+
+.product-nav {
+    margin: 12px 8px 0 8px;
 }
 </style>
