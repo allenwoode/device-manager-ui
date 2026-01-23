@@ -41,7 +41,7 @@
                 name="orgId"
                 :rules="[
                         {
-                            required: true,
+                            required: false,
                             message: $t('Save.index.902471-18'),
                         },
                     ]"

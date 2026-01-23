@@ -89,18 +89,18 @@ const getExtraRoutesMap = () => {
 
 const getComponents = () => {
     return {
-        'department': [
-            {
-                name: 'product',
-                label: 'Department.index.945805-0',
-                component:  defineAsyncComponent(() => import('./views/department/product/index.vue'))
-            },
-            {
-                name: 'device',
-                label: 'Department.index.945805-1',
-                component: defineAsyncComponent(() => import('./views/department/device/index.vue'))
-            },
-        ],
+        // 'department': [
+        //     {
+        //         name: 'product',
+        //         label: 'Department.index.945805-0',
+        //         component:  defineAsyncComponent(() => import('./views/department/product/index.vue'))
+        //     },
+        //     {
+        //         name: 'device',
+        //         label: 'Department.index.945805-1',
+        //         component: defineAsyncComponent(() => import('./views/department/device/index.vue'))
+        //     },
+        // ],
         'initHome': [
             {
                 name: 'initData',

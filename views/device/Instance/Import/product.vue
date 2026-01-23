@@ -6,7 +6,7 @@
     class="device-import-product"
     target="device-import-product"
   />
-  <div class="alert">{{ $t('Import.product.411796-0') }}</div>
+  <div class="alert">{{ $t('Import.product.411796-0')}}</div>
   <j-scrollbar :height='400'>
     <j-pro-table
       mode='CARD'
