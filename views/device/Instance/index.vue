@@ -1042,18 +1042,18 @@ onMounted(() => {
     color: #888;
 }
 
-.list-render-sticky {
+/* .list-render-sticky {
     position: sticky;
     top: 0;
     z-index: 5;
     background: #fff;
     padding: 8px 0;
     border-bottom: 1px solid rgba(0, 0, 0, 0.04);
-}
+} */
 
 .product-list-header {
     font-weight: 600;
-    padding-left: 8px;
+    margin-bottom: 8px;
 }
 
 .instance-split {
