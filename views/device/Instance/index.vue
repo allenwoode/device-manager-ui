@@ -1,241 +1,160 @@
 <template>
     <j-page-container>
-        <pro-search
-            :columns="columns"
-            target="device-instance"
-            @search="handleSearch"
-        />
+        <pro-search :columns="columns" target="device-instance" @search="handleSearch" />
         <FullPage>
 
-    <div class="property-box">
-        <div class="property-box-left">
-                        <div class="product-nav">
-                            <div class="product-list">
-                                <div class="list-render-sticky">
-                                        <div class="product-list-header">{{$t('Instance.index.133466-39')}}<span class="product-count">({{ filteredProducts.length }})</span></div>
-                                </div>
-                                <a-input-search
-                                    v-model:value="value"
-                                    :placeholder="$t('Instance.index.133466-40')"
-                                    style="width: 240px; margin-bottom: 10px"
-                                    @search="onSearch"
-                                    :allowClear="true"
-                                />
-                                <a-card
-                                    v-for="item in filteredProducts"
-                                    :key="item.id"
-                                    :class="['product-card', { active: selectedProduct === item.id || selectedProducts.includes(item.id) }]"
-                                    hoverable
-                                >
-                                    <div class="product-card-inner" @click="selectedProduct = item.id">
-                                        <img class="product-pic" :src="item.photoUrl || device.deviceCard" alt="" />
-                                        <div class="product-meta">
-                                            <div class="product-name">{{ item.name }}</div>
-                                        </div>
-                                    </div>
-                                </a-card>
-                            </div>
+            <div class="property-box">
+                <div class="property-box-left">
+                    <div class="product-nav">
+                        <div class="list-render-sticky">
+                            <div class="product-list-header">{{ $t('Instance.index.133466-39') }}<span
+                                    class="product-count">({{ filteredProducts.length }})</span></div>
                         </div>
-        </div>
-  
-        <div class="property-box-right">
-            <JProTable
-                        ref="instanceRef"
-                        :columns="columns"
-                        :request="query"
-                        :defaultParams="{
-                            sorts: [{ name: 'createTime', order: 'desc' }, { name: 'name', order: 'desc'}],
-                        }"
-                        :rowSelection="
-                            isCheck
+                        <a-input-search v-model:value="value" :placeholder="$t('Instance.index.133466-40')"
+                            style="width: 260px; margin-bottom: 10px" @search="onSearch" :allowClear="true" />
+                        <div class="product-list">
+
+                            <a-card v-for="item in filteredProducts" :key="item.id"
+                                :class="['product-card', { active: selectedProduct === item.id || selectedProducts.includes(item.id) }]"
+                                hoverable>
+                                <div class="product-card-inner" @click="selectedProduct = item.id">
+                                    <img class="product-pic" :src="item.photoUrl || device.deviceCard" alt="" />
+                                    <div class="product-meta">
+                                        <div class="product-name">{{ item.name }}</div>
+                                    </div>
+                                </div>
+                            </a-card>
+                            
+                        </div>
+                    </div>
+                </div>
+
+                <div class="property-box-right">
+                    <JProTable ref="instanceRef" :columns="columns" :request="query" :defaultParams="{
+                        sorts: [{ name: 'createTime', order: 'desc' }, { name: 'name', order: 'desc' }],
+                    }" :rowSelection="isCheck
                                 ? {
-                                      selectedRowKeys: _selectedRowKeys,
-                                      onSelect: onSelectChange,
-                                      onSelectAll: selectAll,
-                                      onSelectNone: () => (_selectedRowKeys = []),
-                                  }
+                                    selectedRowKeys: _selectedRowKeys,
+                                    onSelect: onSelectChange,
+                                    onSelectAll: selectAll,
+                                    onSelectNone: () => (_selectedRowKeys = []),
+                                }
                                 : false
-                        "
-                        :params="params"
-                        modeValue="CARD"
-                    >
+                            " :params="params" modeValue="CARD">
                         <template #headerLeftRender>
                             <a-space>
-                                <j-permission-button
-                                    type="primary"
-                                    @click="handleAdd"
-                                    hasPermission="device/Instance:add"
-                                >
-                                    <template #icon
-                                        ><AIcon type="PlusOutlined"
-                                    /></template>
+                                <j-permission-button type="primary" @click="handleAdd"
+                                    hasPermission="device/Instance:add">
+                                    <template #icon>
+                                        <AIcon type="PlusOutlined" />
+                                    </template>
                                     {{ $t('Instance.index.133466-0') }}
                                 </j-permission-button>
-                                <BatchDropdown
-                                    v-model:isCheck="isCheck"
-                                    :actions="batchActions"
-                                    @change="onCheckChange"
-                                />
+                                <BatchDropdown v-model:isCheck="isCheck" :actions="batchActions"
+                                    @change="onCheckChange" />
                             </a-space>
                         </template>
 
-                <template #card="slotProps">
-                    <CardBox
-                        :value="slotProps"
-                        @click="handleClick"
-                        :actions="getActions(slotProps, 'card')"
-                        :active="_selectedRowKeys.includes(slotProps.id)"
-                        :status="slotProps.state?.value"
-                        :statusText="slotProps.state?.text"
-                        :statusNames="{
-                            online: 'processing',
-                            offline: 'error',
-                            notActive: 'warning',
-                        }"
-                    >
-                        <template #img>
-                            <img
-                                :width="80"
-                                :height="80"
-                                :src="
-                                    slotProps?.photoUrl ||
-                                    device.deviceCard
-                                "
-                            />
-                        </template>
-                        <template #content>
-                            <j-ellipsis style="width: calc(100% - 100px); margin-bottom: 5px">
-                                <span style="font-weight: 600; font-size: 16px">
-                                {{ slotProps.name }}
-                                </span>
-                            </j-ellipsis>
-                            <j-ellipsis style="margin-bottom: 18px">
-                                <span style="font-weight: 300; font-size: 14px">
-                                {{ slotProps.id }}
-                                </span>
-                            </j-ellipsis>
-                            <a-row>
-                                <a-col :span="12">
-                                    <div class="card-item-content-text">
-                                        {{ $t('Instance.index.133466-1') }}
-                                    </div>
-                                    <div>{{ slotProps.deviceType?.text }}</div>
-                                </a-col>
-                                <a-col :span="12">
-                                    <div class="card-item-content-text">
-                                        {{ $t('Instance.index.133466-2') }}
-                                    </div>
-                                    <j-ellipsis style="width: 100%">
-                                        {{ slotProps.productName }}
-                                    </j-ellipsis>
-                                </a-col>
-                            </a-row>
-                        </template>
-                        <template #actions="item">
-                            <j-permission-button
-                                :disabled="item.disabled"
-                                :popConfirm="item.popConfirm"
-                                :tooltip="{
-                                    ...item.tooltip,
-                                }"
-                                @click="item.onClick"
-                                :hasPermission="'device/Instance:' + item.key"
-                            >
-                                <AIcon
-                                    type="DeleteOutlined"
-                                    v-if="item.key === 'delete'"
-                                />
-                                <template v-else>
-                                    <AIcon :type="item.icon" />
-                                    <span>{{ item?.text }}</span>
+                        <template #card="slotProps">
+                            <CardBox :value="slotProps" @click="handleClick" :actions="getActions(slotProps, 'card')"
+                                :active="_selectedRowKeys.includes(slotProps.id)" :status="slotProps.state?.value"
+                                :statusText="slotProps.state?.text" :statusNames="{
+                                    online: 'processing',
+                                    offline: 'error',
+                                    notActive: 'warning',
+                                }">
+                                <template #img>
+                                    <img :width="80" :height="80" :src="slotProps?.photoUrl ||
+                                        device.deviceCard
+                                        " />
                                 </template>
-                            </j-permission-button>
+                                <template #content>
+                                    <j-ellipsis style="width: calc(100% - 100px); margin-bottom: 5px">
+                                        <span style="font-weight: 600; font-size: 16px">
+                                            {{ slotProps.name }}
+                                        </span>
+                                    </j-ellipsis>
+                                    <j-ellipsis style="margin-bottom: 18px">
+                                        <span style="font-weight: 300; font-size: 14px">
+                                            {{ slotProps.id }}
+                                        </span>
+                                    </j-ellipsis>
+                                    <a-row>
+                                        <a-col :span="12">
+                                            <div class="card-item-content-text">
+                                                {{ $t('Instance.index.133466-1') }}
+                                            </div>
+                                            <div>{{ slotProps.deviceType?.text }}</div>
+                                        </a-col>
+                                        <a-col :span="12">
+                                            <div class="card-item-content-text">
+                                                {{ $t('Instance.index.133466-2') }}
+                                            </div>
+                                            <j-ellipsis style="width: 100%">
+                                                {{ slotProps.productName }}
+                                            </j-ellipsis>
+                                        </a-col>
+                                    </a-row>
+                                </template>
+                                <template #actions="item">
+                                    <j-permission-button :disabled="item.disabled" :popConfirm="item.popConfirm"
+                                        :tooltip="{
+                                            ...item.tooltip,
+                                        }" @click="item.onClick" :hasPermission="'device/Instance:' + item.key">
+                                        <AIcon type="DeleteOutlined" v-if="item.key === 'delete'" />
+                                        <template v-else>
+                                            <AIcon :type="item.icon" />
+                                            <span>{{ item?.text }}</span>
+                                        </template>
+                                    </j-permission-button>
+                                </template>
+                            </CardBox>
                         </template>
-                    </CardBox>
-                </template>
 
-                <template #state="slotProps">
-                    <j-badge-status
-                        :status="slotProps.state?.value"
-                        :text="slotProps.state?.text"
-                        :statusNames="{
-                            online: 'processing',
-                            offline: 'error',
-                            notActive: 'warning',
-                        }"
-                    />
-                </template>
-
-                <template #createTime="slotProps">
-                    <span>{{
-                        slotProps?.createTime
-                            ? dayjs(slotProps.createTime).format('YYYY-MM-DD HH:mm:ss')
-                            : ''
-                    }}</span>
-                </template>
-
-                <template #action="slotProps">
-                    <a-space :size="16">
-                        <template
-                            v-for="i in getActions(slotProps, 'table')"
-                            :key="i.key"
-                        >
-                            <j-permission-button
-                                :disabled="i.disabled"
-                                :popConfirm="i.popConfirm"
-                                :tooltip="{
-                                    ...i.tooltip,
-                                }"
-                                @click="i.onClick"
-                                type="link"
-                                style="padding: 0 5px"
-                                :danger="i.key === 'delete'"
-                                :hasPermission="
-                                    i.key === 'view'
-                                        ? true
-                                        : 'device/Instance:' + i.key
-                                "
-                            >
-                                <template #icon
-                                    ><AIcon :type="i.icon"
-                                /></template>
-                            </j-permission-button>
+                        <template #state="slotProps">
+                            <j-badge-status :status="slotProps.state?.value" :text="slotProps.state?.text" :statusNames="{
+                                online: 'processing',
+                                offline: 'error',
+                                notActive: 'warning',
+                            }" />
                         </template>
-                    </a-space>
-                </template>
-                
-            </JProTable>
-        </div>
-        </div>
+
+                        <template #createTime="slotProps">
+                            <span>{{
+                                slotProps?.createTime
+                                    ? dayjs(slotProps.createTime).format('YYYY-MM-DD HH:mm:ss')
+                                    : ''
+                                }}</span>
+                        </template>
+
+                        <template #action="slotProps">
+                            <a-space :size="16">
+                                <template v-for="i in getActions(slotProps, 'table')" :key="i.key">
+                                    <j-permission-button :disabled="i.disabled" :popConfirm="i.popConfirm" :tooltip="{
+                                        ...i.tooltip,
+                                    }" @click="i.onClick" type="link" style="padding: 0 5px" :danger="i.key === 'delete'"
+                                        :hasPermission="i.key === 'view'
+                                                ? true
+                                                : 'device/Instance:' + i.key
+                                            ">
+                                        <template #icon>
+                                            <AIcon :type="i.icon" />
+                                        </template>
+                                    </j-permission-button>
+                                </template>
+                            </a-space>
+                        </template>
+
+                    </JProTable>
+                </div>
+            </div>
         </FullPage>
     </j-page-container>
-    <Import
-        v-if="importVisible"
-        @cancel="importVisible = false"
-        @save="onRefresh"
-    />
-    <Export
-        v-if="exportVisible"
-        @close="exportVisible = false"
-        :data="params"
-        @save="onRefresh"
-    />
-    <Process
-        v-if="operationVisible"
-        @close="operationVisible = false"
-        :api="api"
-        :type="type"
-        :data="params"
-        @save="onRefresh"
-    />
-    <Save
-        v-if="visible"
-        :title="title"
-        :isAdd="isAdd"
-        :data="current"
-        @close="visible = false"
-        @save="saveBtn"
-    />
+    <Import v-if="importVisible" @cancel="importVisible = false" @save="onRefresh" />
+    <Export v-if="exportVisible" @close="exportVisible = false" :data="params" @save="onRefresh" />
+    <Process v-if="operationVisible" @close="operationVisible = false" :api="api" :type="type" :data="params"
+        @save="onRefresh" />
+    <Save v-if="visible" :title="title" :isAdd="isAdd" :data="current" @close="visible = false" @save="saveBtn" />
 </template>
 
 <script setup lang="ts">
@@ -943,7 +862,7 @@ const handleSearch = (_params: any) => {
                         : item2.value,
                 };
             }
-            if(item2.column === 'id$dev-tag') {
+            if (item2.column === 'id$dev-tag') {
                 item2 = {
                     terms: [
                         ...item2.value.map(i => i)
@@ -980,7 +899,7 @@ const deleteDevice = async () => {
 
 onMounted(() => {
     // load products for left filter
-    queryNoPagingPost({ paging: false, sorts: [{ name: 'createTime', order: 'desc' }]}).then((resp: any) => {
+    queryNoPagingPost({ paging: false, sorts: [{ name: 'createTime', order: 'desc' }] }).then((resp: any) => {
         if (resp.status === 200) {
             productList.value = resp.result as Record<string, any>[];
             filteredProducts.value = productList.value.slice();
@@ -1004,7 +923,7 @@ onMounted(() => {
         selectedProducts.value = [];
         applyProductFilter();
     });
-    
+
     // live filter when search value changes
     watch(value, (v) => {
         onSearch(v as unknown as string);
@@ -1024,7 +943,7 @@ onMounted(() => {
         importVisible.value = true;
     }
     if (isNoCommunity) {
-        columns.value.splice(columns.value.length - 3,0,{
+        columns.value.splice(columns.value.length - 3, 0, {
             dataIndex: 'id$dim-assets',
             title: $t('Instance.index.133466-16'),
             hideInTable: true,
@@ -1067,16 +986,16 @@ onMounted(() => {
 </script>
 
 <style scoped>
-    
 .property-box {
     display: flex;
+
     .property-box-left {
-        width: 260px;
         display: flex;
         flex-direction: column;
-        overflow: hidden;
+
         max-height: calc(100vh - 140px);
     }
+
     .property-box-right {
         flex: 1;
     }
@@ -1086,11 +1005,12 @@ onMounted(() => {
     display: flex;
     flex-direction: column;
     gap: 8px;
-
 }
+
 .product-card {
     cursor: pointer;
 }
+
 .product-card.active {
     background: #f0f7ff;
     border-color: #1890ff;
@@ -1101,24 +1021,22 @@ onMounted(() => {
     gap: 8px;
     align-items: center;
 }
-.product-card-checkbox {
-    position: absolute;
-    right: 8px;
-    top: 8px;
-}
+
 .product-pic {
     width: 40px;
     height: 40px;
     object-fit: cover;
-    border-radius: 4px;
 }
+
 .product-meta {
     display: flex;
     flex-direction: column;
 }
-.product-name {
+
+/* .product-name {
     font-weight: 600;
-}
+} */
+
 .product-id {
     font-size: 12px;
     color: #888;
@@ -1130,8 +1048,9 @@ onMounted(() => {
     z-index: 5;
     background: #fff;
     padding: 8px 0;
-    border-bottom: 1px solid rgba(0,0,0,0.04);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.04);
 }
+
 .product-list-header {
     font-weight: 600;
     padding-left: 8px;
@@ -1141,6 +1060,7 @@ onMounted(() => {
     display: flex;
     align-items: stretch;
 }
+
 .instance-left {
     display: flex;
     flex-direction: column;
@@ -1152,6 +1072,7 @@ onMounted(() => {
     overflow: auto;
     max-height: calc(100vh - 140px);
 }
+
 .product-list {
     display: flex;
     flex-direction: column;
