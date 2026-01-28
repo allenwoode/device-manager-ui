@@ -116,7 +116,7 @@
                     name="orgId"
                     :rules="[
                         {
-                            required: false,
+                            required: true,
                             message: $t('Save.index.902471-18'),
                         },
                     ]"
@@ -191,6 +191,10 @@ const props = defineProps({
         type: Object,
         default: undefined,
     },
+    departmentId: {
+        type: String,
+        default: '',
+    },
 });
 // const props = defineProps({
 //     data: {
@@ -207,7 +211,7 @@ const formRef = ref();
 const modelRef = reactive({
     productId: undefined,
     id: undefined,
-    orgId: undefined,
+    orgId: props.departmentId || '',
     name: '',
     describe: '',
     photoUrl: props.data.devicePhotoUrl || device.deviceCard,

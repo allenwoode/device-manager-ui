@@ -41,7 +41,7 @@
                 name="orgId"
                 :rules="[
                         {
-                            required: false,
+                            required: true,
                             message: $t('Save.index.902471-18'),
                         },
                     ]"
@@ -120,12 +120,16 @@ const props = defineProps({
     accessProvider: {
         type: String,
         default: undefined, 
-    }
+    },
+    departmentId: {
+        type: String,
+        default: '',
+    },
 });
 
 const modelRef = reactive({
     product: props.product,
-    orgId: '' as string,
+    orgId: props.departmentId,
     upload: [],
     file: {
         fileType: 'xlsx',

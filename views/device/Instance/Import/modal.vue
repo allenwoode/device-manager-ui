@@ -31,7 +31,7 @@
         </a-form>
       </div>
       <div v-else>
-        <File v-if='importData.type ==="file"' :product='importData.productId' :accessProvider="productDetail?.accessProvider"  />
+        <File v-if='importData.type ==="file"' :product='importData.productId' :departmentId="props.departmentId" :accessProvider="productDetail?.accessProvider"  />
         <Plugin v-else :accessId='productDetail.accessId'  @change='pluginChange'/>
       </div>
     </div>
@@ -66,6 +66,14 @@ import { useI18n } from 'vue-i18n';
 
 const { t: $t } = useI18n();
 const emit = defineEmits(['cancel', 'save']);
+
+const props = defineProps({
+  departmentId: {
+    type: String,
+    default: '',
+  },
+})
+
 const steps = ref(0) // 步骤
 const importData = reactive<{productId?: string, type?: string}>({
   productId: undefined,

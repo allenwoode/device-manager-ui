@@ -1,15 +1,12 @@
 <template>
     <j-page-container>
+        <!-- 搜索栏 -->
         <pro-search :columns="columns" target="device-instance" @search="handleSearch" />
         <FullPage>
 
             <div class="property-box">
                 <div class="property-box-left">
-                    <div class="product-nav">
-                        <div class="list-render-sticky">
-                            <div class="product-list-header">{{ $t('Instance.index.133466-39') }}<span
-                                    class="product-count">({{ filteredProducts.length }})</span></div>
-                        </div>
+                    <!-- <div class="product-nav">
                         <a-input-search v-model:value="value" :placeholder="$t('Instance.index.133466-40')"
                             style="width: 260px; margin-bottom: 10px" @search="onSearch" :allowClear="true" />
                         <div class="product-list">
@@ -26,13 +23,20 @@
                             </a-card>
                             
                         </div>
+                    </div> -->
+                    <div class="organization-nav">
+                        <LeftTree @change="onChange" />
                     </div>
                 </div>
 
                 <div class="property-box-right">
-                    <JProTable ref="instanceRef" :columns="columns" :request="query" :defaultParams="{
-                        sorts: [{ name: 'createTime', order: 'desc' }, { name: 'name', order: 'desc' }],
-                    }" :rowSelection="isCheck
+                    <JProTable ref="instanceRef"
+                        :columns="columns" 
+                        :request="query" 
+                        :defaultParams="{
+                            sorts: [{ name: 'createTime', order: 'desc' }, { name: 'name', order: 'desc' }],
+                        }" 
+                        :rowSelection="isCheck
                                 ? {
                                     selectedRowKeys: _selectedRowKeys,
                                     onSelect: onSelectChange,
@@ -50,7 +54,10 @@
                                     </template>
                                     {{ $t('Instance.index.133466-0') }}
                                 </j-permission-button>
-                                <BatchDropdown v-model:isCheck="isCheck" :actions="batchActions"
+                                <!-- 批量操作 -->
+                                <BatchDropdown 
+                                    v-model:isCheck="isCheck" 
+                                    :actions="batchActions"
                                     @change="onCheckChange" />
                             </a-space>
                         </template>
@@ -130,13 +137,16 @@
                         <template #action="slotProps">
                             <a-space :size="16">
                                 <template v-for="i in getActions(slotProps, 'table')" :key="i.key">
-                                    <j-permission-button :disabled="i.disabled" :popConfirm="i.popConfirm" :tooltip="{
-                                        ...i.tooltip,
-                                    }" @click="i.onClick" type="link" style="padding: 0 5px" :danger="i.key === 'delete'"
-                                        :hasPermission="i.key === 'view'
-                                                ? true
-                                                : 'device/Instance:' + i.key
-                                            ">
+                                    <j-permission-button 
+                                        :disabled="i.disabled" 
+                                        :popConfirm="i.popConfirm" 
+                                        :tooltip="{
+                                            ...i.tooltip,
+                                    }" @click="i.onClick" 
+                                        type="link" 
+                                        style="padding: 0 5px" :danger="i.key === 'delete'"
+                                        :hasPermission="i.key === 'view' ? true : 'device/Instance:' + i.key
+                                    ">
                                         <template #icon>
                                             <AIcon :type="i.icon" />
                                         </template>
@@ -150,11 +160,19 @@
             </div>
         </FullPage>
     </j-page-container>
-    <Import v-if="importVisible" @cancel="importVisible = false" @save="onRefresh" />
+
+    <Import v-if="importVisible" :departmentId="departmentId" @cancel="importVisible = false" @save="onRefresh" />
     <Export v-if="exportVisible" @close="exportVisible = false" :data="params" @save="onRefresh" />
-    <Process v-if="operationVisible" @close="operationVisible = false" :api="api" :type="type" :data="params"
-        @save="onRefresh" />
-    <Save v-if="visible" :title="title" :isAdd="isAdd" :data="current" @close="visible = false" @save="saveBtn" />
+    <Process v-if="operationVisible" @close="operationVisible = false" :api="api" :type="type" :data="params" @save="onRefresh" />
+
+    <!-- 新增or编辑 -->
+    <Save v-if="visible" 
+        :title="title" 
+        :isAdd="isAdd" 
+        :data="current" 
+        :departmentId="departmentId" 
+        @close="visible = false"
+        @save="saveBtn" />
 </template>
 
 <script setup lang="ts">
@@ -191,6 +209,8 @@ import { device } from '../../../assets';
 import { isNoCommunity } from '@/utils/utils';
 import { useI18n } from 'vue-i18n';
 
+import LeftTree from "./components/LeftTree.vue";
+
 const { t: $t } = useI18n();
 
 const instanceRef = ref<Record<string, any>>({});
@@ -213,6 +233,16 @@ const current = ref<Record<string, any>>({});
 const operationVisible = ref<boolean>(false);
 const api = ref<string>('');
 const type = ref<string>('');
+
+//const parentIds = ref<string[]>([]);
+//const parentId = ref<string>("");
+const departmentId = ref<string>("");
+
+const onChange = (n: string[] = []) => {
+    departmentId.value = n[0] || "";
+    //parentId.value = n[1] || "";
+    //parentIds.value = n.slice(2);
+};
 
 const onSearch = (v?: string) => {
     const q = (v ?? value.value ?? '').toString().trim().toLowerCase();
@@ -657,8 +687,10 @@ const handleClick = (dt: any) => {
     }
 };
 
+// 批量操作时，选中状态变化
 const onCheckChange = () => {
     _selectedRowKeys.value = [];
+    //alert(_selectedRowKeys.value.length);
 };
 
 const handleGetParams = (p: any) => {
@@ -918,11 +950,24 @@ onMounted(() => {
         instanceRef.value?.reload();
     };
 
-    watch(() => selectedProduct.value, () => {
+    watch(
+        () => selectedProduct.value, 
+        () => {
         // clear multi selection when single product clicked
         selectedProducts.value = [];
         applyProductFilter();
-    });
+        }
+    );
+
+    watch(
+        () => departmentId.value,
+        () => {
+            //console.log('>>>>departmentId.value:', departmentId.value);
+            params.value = { terms: [{ column: 'orgId', termType: 'eq', value: departmentId.value}] };
+            instanceRef.value?.reload();
+            //alert(departmentId.value);
+        }
+    );
 
     // live filter when search value changes
     watch(value, (v) => {
@@ -936,12 +981,15 @@ onMounted(() => {
         }
         applyProductFilter();
     });
+
     if (routerParams.params.value?.type === 'add') {
         handleAdd();
     }
+
     if (routerParams.params.value?.type === 'import') {
         importVisible.value = true;
     }
+
     if (isNoCommunity) {
         columns.value.splice(columns.value.length - 3, 0, {
             dataIndex: 'id$dim-assets',
@@ -1083,6 +1131,10 @@ onMounted(() => {
 }
 
 .product-nav {
+    margin: 12px 8px 0 8px;
+}
+
+.organization-nav {
     margin: 12px 8px 0 8px;
 }
 </style>
