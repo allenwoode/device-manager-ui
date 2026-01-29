@@ -172,6 +172,7 @@ import { onlyMessage } from '@jetlinks-web/utils';
 import { device} from "../../../../assets";
 import { useI18n } from 'vue-i18n';
 import { isInput } from '@device/utils/utils';
+//import { co } from '@fullcalendar/core/internal-common';
 //import { get } from 'lodash-es';
 
 const { t: $t } = useI18n();
@@ -211,10 +212,10 @@ const formRef = ref();
 const modelRef = reactive({
     productId: undefined,
     id: undefined,
-    orgId: props.departmentId || '',
+    orgId: props.departmentId || undefined,
     name: '',
     describe: '',
-    photoUrl: props.data.devicePhotoUrl || device.deviceCard,
+    photoUrl: props.data?.devicePhotoUrl || device.deviceCard,
 });
 
 const vailId = async (_: Record<string, any>, value: string) => {
@@ -251,7 +252,6 @@ watch(
                 {
                     terms: [
                         {
-                            termType: 'eq',
                             column: 'state',
                             value: 1,
                         },
@@ -263,11 +263,11 @@ watch(
                 productList.value = resp.result as Record<string, any>[];
             }
         });
-        Object.assign(modelRef, newValue);
+        Object.assign(modelRef, newValue ? JSON.parse(JSON.stringify(newValue)) : {});
         // description 和 describe 处理
         modelRef.describe = newValue?.describe || newValue?.description
     },
-    { immediate: true, deep: true },
+    { immediate: true },
 );
 
 watch(
@@ -276,17 +276,15 @@ watch(
         getTreeData_api({
             paging: false,
             sorts: [{ name: 'sortIndex', order: 'asc' }],
-            terms: [],
+            terms: [{ column: 'level', value: '1' }],
         }).then((resp) => {
             if (resp.status === 200) {
                 organizationList.value = resp.result as Record<string, any>[];
             }
         });
-        Object.assign(modelRef, newValue);
-        // description 和 describe 处理
-        modelRef.describe = newValue?.describe || newValue?.description
+        Object.assign(modelRef, newValue ? JSON.parse(JSON.stringify(newValue)) : {});
     },
-    { immediate: true, deep: true },
+    { immediate: true },
 );
 
 const handleCancel = () => {

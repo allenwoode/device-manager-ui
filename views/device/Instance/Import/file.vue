@@ -5,7 +5,7 @@
                 <template #label>
                     <div>
                         {{ $t('Import.file.677857-0') }}
-                        <div class="alert"><AIcon style="margin-right: 5px;" type="InfoCircleOutlined" />{{ $t('Import.file.677857-1') }}</div>
+                        <!-- <div class="alert"><AIcon style="margin-right: 5px;" type="InfoCircleOutlined" />{{ $t('Import.file.677857-1') }}</div> -->
                     </div>
                 </template>
 
@@ -46,13 +46,13 @@
                         },
                     ]"
                 >
-                    <template #label>
+                <template #label>
                         <span>{{ $t('Save.index.902471-17') }}
                         </span>
                     </template>
                     <a-select
-                        v-model:value="modelRef.orgId"
                         showSearch
+                        v-model:value="modelRef.orgId"
                         :placeholder="$t('Save.index.902471-18')"
                         option-filter-prop="label"
                     >
@@ -129,7 +129,7 @@ const props = defineProps({
 
 const modelRef = reactive({
     product: props.product,
-    orgId: props.departmentId,
+    orgId: props.departmentId || undefined,
     upload: [],
     file: {
         fileType: 'xlsx',
@@ -155,7 +155,7 @@ watch(
         getTreeData_api({
             paging: false,
             sorts: [{ name: 'sortIndex', order: 'asc' }],
-            terms: [],
+            terms: [{ column: 'level', value: '1' }],
         }).then((resp) => {
             if (resp.status === 200) {
                 organizationList.value = resp.result as Record<string, any>[];

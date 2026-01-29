@@ -49,7 +49,7 @@
                 >
                   <AIcon type="EditOutlined" />
                 </j-permission-button>
-                <j-permission-button
+                <!-- <j-permission-button
                   :hasPermission="`${permission}:add`"
                   type="link"
                   :tooltip="{
@@ -64,7 +64,7 @@
                   "
                 >
                   <AIcon type="PlusCircleOutlined" />
-                </j-permission-button>
+                </j-permission-button> -->
                 <j-permission-button
                   type="link"
                   :hasPermission="`${permission}:delete`"
@@ -144,6 +144,7 @@ const getTree = (cb?: Function) => {
   loading.value = true
   const params = {
     paging: false,
+    terms: [{ column: 'level', value: '1' }],
     sorts: [{ name: 'sortIndex', order: 'asc' }, { name: 'name', order: 'asc' }],
   } as any
   if (searchValue.value) {
@@ -211,6 +212,7 @@ function handleTreeMap(_data: any[]) {
     })
   }
 }
+
 // 删除部门
 const delDepartment = (id: string) => {
   delDepartment_api(id).then((resp) => {
@@ -258,19 +260,7 @@ const openDialog = (row: any = {}) => {
 const onSelect = (val: string[], info?: any) => {
   if (val && val.length) {
     const id = val[0];
-    // // try to read parentId from the event info, node data or fallback to treeMap
-    const parentId =
-      info?.node?.dataRef?.parentId || info?.node?.origin?.parentId ||
-      (info?.selectedNodes && info.selectedNodes[0]?.parentId) ||
-      (treeMap.has(id) ? treeMap.get(id).parentId : undefined);
-
     const keys: string[] = [id];
-    keys.push(parentId);
-    // // push all first level node id to keys
-    treeData.value.forEach((item) => { 
-      keys.push(item.id);
-    });
-
     selectedKeys.value = keys;
   } else {
     selectedKeys.value = [];
@@ -329,6 +319,10 @@ onUnmounted(() => {
     width: calc(100% - 80px);
   }
   .func-btn {
+    flex: 1;
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
     font-size: 14px;
     width: 80px;
   }

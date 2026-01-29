@@ -10,7 +10,7 @@
     :confirmLoading="loading"
   >
     <a-form ref="formRef" :model="formModel.data" layout="vertical">
-      <a-form-item name="parentId" :label="$t('components.Save.069696-0')">
+      <!-- <a-form-item name="parentId" :label="$t('components.Save.069696-0')">
         <a-tree-select
           v-model:value="formModel.data.parentId"
           style="width: 100%"
@@ -22,7 +22,7 @@
         >
           <template #title="{ name }"> {{ name }} </template>
         </a-tree-select>
-      </a-form-item>
+      </a-form-item> -->
       <a-form-item
         name="name"
         :label="$t('components.Save.069696-2')"
@@ -55,8 +55,8 @@ import { cloneDeep } from 'lodash-es'
 import { addDepartment_api, updateDepartment_api } from '@authentication-manager/api/system/department'
 import { onlyMessage } from '@jetlinks-web/utils'
 import { useRequest } from '@jetlinks-web/hooks'
-import { FormType, TreeType } from '../typings';
-import { filterTree, findItemById } from '../util';
+//import { FormType, TreeType } from '../typings';
+//import { filterTree, findItemById } from '../util';
 import { useI18n } from 'vue-i18n';
 
 const { t: $t } = useI18n();
@@ -106,14 +106,14 @@ const confirm = () => {
 }
 
 // 顺序选择
-const treeData = computed(() => {
-  if (!props.data.id) return props.treeData
-  const result = cloneDeep(props.treeData) as TreeType[]
-  const me = findItemById(result, props.data.id) as TreeType
-  me.disabled = true
-  me.children && me.children.length > 0 && filterTree(me.children)
-  return result
-})
+// const treeData = computed(() => {
+//   if (!props.data.id) return props.treeData
+//   const result = cloneDeep(props.treeData) as TreeType[]
+//   const me = findItemById(result, props.data.id) as TreeType
+//   me.disabled = true
+//   me.children && me.children.length > 0 && filterTree(me.children)
+//   return result
+// })
 
 const checkSort = (e: any) => {
   const value = e.target.value.match(/^[1-9]*/)[0]
@@ -126,15 +126,15 @@ const checkSort = (e: any) => {
 /**
  * 上级组织选择改变
  */
- const handleTreeSelectChange = (val: string) => {
-  // 上级组织
-  formModel.data.parentId = val || ''
-  const parent: any = treeData.value.find((f: any) => f.id === formModel.data.parentId)
-  // 当前编辑的组织排序, 为选择上级组织的最大排序+1, 如上级组织没有自组织, 则默认为1
-  formModel.data.sortIndex = parent?.children
-    ? parent.children[parent.children.length - 1].sortIndex + 1
-    : 1
-}
+//  const handleTreeSelectChange = (val: string) => {
+//   // 上级组织
+//   formModel.data.parentId = val || ''
+//   const parent: any = treeData.value.find((f: any) => f.id === formModel.data.parentId)
+//   // 当前编辑的组织排序, 为选择上级组织的最大排序+1, 如上级组织没有自组织, 则默认为1
+//   formModel.data.sortIndex = parent?.children
+//     ? parent.children[parent.children.length - 1].sortIndex + 1
+//     : 1
+// }
 
 //初始化
 const init = () => {
