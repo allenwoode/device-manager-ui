@@ -77,7 +77,6 @@ export const queryGatewayList = (data: any = defaultGatewayData) => request.post
   * 查询产品列表(分页)
   * @param data 查询条件
   */
-//export const queryProductList = (data: any) => request.post('/device-product/_query', data)
 export const queryProductList = (data: any) => request.post('/device-product/detail/_query', data)
 
  /**

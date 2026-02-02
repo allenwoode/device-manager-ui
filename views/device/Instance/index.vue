@@ -32,7 +32,7 @@
                 <div class="property-box-right">
                     <JProTable ref="instanceRef"
                         :columns="columns" 
-                        :request="queryAsset" 
+                        :request="query" 
                         :defaultParams="{
                             sorts: [{ name: 'createTime', order: 'desc' }, { name: 'name', order: 'desc' }],
                         }" 
@@ -177,7 +177,7 @@
 
 <script setup lang="ts">
 import {
-    queryAsset,
+    //queryAsset,
     query,
     _delete,
     _deploy,
@@ -963,8 +963,11 @@ onMounted(() => {
     watch(
         () => departmentId.value,
         () => {
-            //console.log('>>>>departmentId.value:', departmentId.value);
-            params.value = { terms: [{ column: 'dimensionId', termType: 'eq', value: departmentId.value}] };
+            params.value = { terms: [{ 
+                column: 'id$in-dim-asset$org$device', 
+                //termType: 'eq', 
+                value: [departmentId.value] }
+            ] };
             instanceRef.value?.reload();
             //alert(departmentId.value);
         }

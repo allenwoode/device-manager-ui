@@ -463,8 +463,7 @@ const handleView = (id: string) => {
 const refresh = () => {
   tableRef.value?.reload();
 };
-// 筛选
-const listData = ref([]);
+
 const typeList = ref([]);
 const tableRef = ref<Record<string, any>>({});
 const query = reactive({
