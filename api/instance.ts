@@ -41,12 +41,7 @@ export const detail = (id: string, hiddenError?: any) => request.get<DeviceInsta
 //export const query = (data?: Record<string, any>) => request.post('/device-instance/_query', data)
 export const query = (data?: Record<string, any>) => request.post('/device-instance/detail/_query', data)
 
-/**
- * 组织资产查询
- * @param data 
- * @returns 
- */
-export const queryAsset = (data?: Record<string, any>) => request.post('/assets/device/_query', data)
+export const query1 = (data?: Record<string, any>) => request.post('/device-instance/_query1', data)
 
 /**
  * 不分页查询设备

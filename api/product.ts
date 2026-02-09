@@ -73,6 +73,15 @@ export const category = (data: any) => request.get('/device/category/_tree?pagin
 
 export const queryGatewayList = (data: any = defaultGatewayData) => request.post('/gateway/device/_query/no-paging', data)
 
+/**
+ * 导航查询
+ * @param data 
+ * @returns 
+ */
+export const productNav = (data?: Record<string, any>) => request.post('/device-product/nav/_query', data)
+
+export const productNav1 = (data?: Record<string, any>) => request.post('/device-product/nav/_query1', data)
+
  /**
   * 查询产品列表(分页)
   * @param data 查询条件

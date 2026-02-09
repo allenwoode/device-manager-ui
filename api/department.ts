@@ -23,3 +23,6 @@ export const updatePermission_api = (type: 'device' | 'product', parentId: strin
 
 // 获取部门数据
 export const getTreeData_api = (data: object) => request.post(`/organization/_all/tree`, data);
+
+// 获取当前用户组织
+export const getCurrentUserTreeData_api = (data: object) => request.post(`/organization/all/tree`, data);

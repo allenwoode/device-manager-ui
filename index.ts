@@ -54,13 +54,13 @@ const getExtraRoutesMap = () => {
                 }
             ]
         },
-        'asset/Instance': {
+        'product/Maintain': {
             children: [
                 {
                     code: 'Detail',
                     url: '/detail/:id',
                     name: i18n.global.t('device-manager-ui.index.106686-0'),
-                    component: () => import('./views/asset/Instance/Detail/index.vue')
+                    component: () => import('./views/product/Maintain/Detail/index.vue')
                 }
             ]
         },
