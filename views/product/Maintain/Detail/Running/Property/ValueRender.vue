@@ -80,14 +80,18 @@
          <div class="cardValue">
                 <div v-if="isChargeState" class="status-indicators">
                     <template v-for="(s, idx) in statusValues" :key="idx">
-                        <span :class="['status-dot', getChargeClass(s)]"></span>
+                        <a-tooltip :title="getStatusText('C'+(idx+1))">
+                            <span :class="['status-dot', getChargeClass(s)]"></span>
+                        </a-tooltip>
                     </template>
                 </div>
                 <div v-else-if="isLockState" class="lock-status">
                     <template v-for="(s, idx) in statusValues" :key="idx">
-                        <span :class="['lock-icon', getLockIconClass(s)]">
-                            <i :class="getFaClass(s)" aria-hidden="true"></i>
+                        <a-tooltip :title="getStatusText('C'+(idx+1))">
+                            <span :class="['lock-icon', getLockIconClass(s)]">
+                                <i :class="getFaClass(s)" aria-hidden="true"></i>
                         </span>
+                        </a-tooltip>
                     </template>
                 </div>
                 <!-- <div v-else-if="isUsedState" class="lock-status">
@@ -99,7 +103,9 @@
                 </div> -->
                 <div v-else class="status-indicators">
                     <template v-for="(s, idx) in statusValues" :key="idx">
-                        <span :class="['status-dot', getStatusClass(s)]"></span>
+                        <a-tooltip :title="getStatusText('C'+(idx+1))">
+                            <span :class="['status-dot', getStatusClass(s)]"></span>
+                        </a-tooltip>
                     </template>
                 </div>
             </div>
@@ -207,6 +213,16 @@ const statusValues = computed(() => {
 
     return raw;
 });
+
+const getStatusText = (status: any) => {
+    // const elems = _data.data?.valueType?.elements || [];
+    // if (Array.isArray(elems) && elems.length) {
+    //     const found = elems.find((e: any) => String(e.value) === String(status) || String(e.text) === String(status));
+    //     if (found) return found.text;
+    // }
+
+    return String(status);
+};
 
 // 获取状态点的样式类
 const getStatusClass = (status: any) => {
@@ -428,7 +444,7 @@ const getDetail = (_type: string) => {
             .lock-icon {
                 display: inline-flex;
                 align-items: center;
-                font-size: 20px;
+                font-size: 18px;
                 transition: all 0.3s ease;
                 &.lock-unlocked {
                     color: #52c41a; // 绿色 - 已解锁

@@ -65,20 +65,13 @@
                                 @click="handleView(slotProps.id)" 
                                 :actions="getActions(slotProps, 'card')"
                                 :active="_selectedRowKeys.includes(slotProps.id)" 
-                                :status="slotProps.state?.value"
-                                :statusText="slotProps.state?.text" :statusNames="{
+                                :status="statusValue[slotProps.id]?.value"
+                                :statusText="statusValue[slotProps.id]?.text"
+                                :statusNames="{
                                     online: 'processing',
                                     offline: 'error',
                                     notActive: 'warning',
                                 }">
-
-                                
-
-                                        <!-- <template #img>
-                                            <img :width="80" :height="80" :src="slotProps?.photoUrl" />
-                                        </template> -->
-
-                                    
 
                                         <template #content>
                                             <div style="display: flex; align-items: flex-start;">
@@ -121,11 +114,11 @@
                                             <div class="card-props" style="display:flex; flex-direction: column; align-items:flex-start">
                                                 <template v-for="prop in properties" :key="prop.id">
                                                     <div style="display:flex; flex-direction: column; align-items:flex-start;">
-                                                            <div style="color: #595959; font-size:12px">{{ prop.name }}:</div>
-                                                            <ValueRender :data="prop" :value="propertyValue[slotProps.id]?.[prop.id]" />
+                                                        <div style="color: #595959; font-size:12px">{{ prop.name }}:</div>
+                                                        <ValueRender :data="prop" :value="propertyValue[slotProps.id]?.[prop.id]" />
                                                     </div>
                                                 </template>
-                                                <LoadDeviceValues :deviceId="slotProps.id" />
+                                                <LoadDeviceValues :data="slotProps" />
                                             </div>
                                         </template>
 
@@ -142,12 +135,13 @@
                                     </j-permission-button>
                                 </template>
                             </CardBox>
-
-                            
                         </template>
 
                         <template #state="slotProps">
-                            <j-badge-status :status="slotProps.state?.value" :text="slotProps.state?.text" :statusNames="{
+                            <j-badge-status 
+                            :status="statusValue[slotProps.id]?.value" 
+                            :text="statusValue[slotProps.id]?.text" 
+                            :statusNames="{
                                 online: 'processing',
                                 offline: 'error',
                                 notActive: 'warning',
@@ -272,17 +266,27 @@ const type = ref<string>('');
 
 const departmentId = ref<string>("");
 
-const instanceStore = useInstanceStore();
+//const instanceStore = useInstanceStore();
 const dataSource = ref<PropertyData[]>([]);
 const loading = ref<boolean>(false);
-// store values per device: { [deviceId]: { [propertyId]: valueObj } }
+// store property values per device: { [deviceId]: { [propertyId]: valueObj } }
 const propertyValue = ref<Record<string, Record<string, any>>>({});
 
-import { cloneDeep, divide, groupBy, throttle, toArray } from 'lodash-es';
+// store status values per device: { [deviceId]: valueObj }
+const statusValue = ref<Record<string, any>>({});
+
+const statusMap = new Map();
+
+statusMap.set('online', 'success');
+statusMap.set('offline', 'error');
+statusMap.set('notActive', 'warning');
+
+import { groupBy, throttle, toArray } from 'lodash-es';
 import { wsClient } from '@jetlinks-web/core';
 import { map } from 'rxjs/operators';
 import { defineComponent } from 'vue';
 
+const statusRef = ref<Record<string, any>>({});
 const subRef = ref<Record<string, any>>({});
 
 const onChange = (n: string[] = []) => {
@@ -350,17 +354,14 @@ const properties = [
 // lightweight component: when a card mounts, request dashboard for that device
 const LoadDeviceValues = defineComponent({
     props: {
-        deviceId: String,
+        data: Object,
     },
     setup(props) {
         onMounted(() => {
-            const deviceId = props.deviceId as string;
-            if (!deviceId) return;
-            if (propertyValue.value[deviceId] && Object.keys(propertyValue.value[deviceId]).length) return;
-            if (!selectedProduct.value) return;
-            const sep = '::';
-            const [prodId] = selectedProduct.value.split(sep);
-            if (prodId) getDashboard(prodId, deviceId);
+            if (!props.data?.id || !props.data?.productId) return;
+            statusValue.value[props.data.id] = props.data.state || {};
+            if (propertyValue.value[props.data.id] && Object.keys(propertyValue.value[props.data.id]).length) return;
+            if (props.data.productId) getDashboard(props.data.productId, props.data.id);
         });
         return () => null;
     },
@@ -568,11 +569,33 @@ const valueChange = (arr: Record<string, any>[], deviceId: string) => {
         });
 };
 
+// 订阅设备状态
+const subscribeStatus = (deviceId: string) => {
+    statusRef.value[deviceId] = wsClient.getWebSocket(
+        `instance-editor-info-status-${deviceId}`,
+        `/dashboard/device/status/change/realTime`,
+        {
+            deviceId: deviceId,
+        },
+    )
+    ?.pipe(map((res: any) => res.payload))
+    .subscribe((payload) => {
+        //console.log('>>>>>subscribe state update:', statusValue.value[deviceId], payload?.value);
+        if (payload?.value?.type !== statusValue.value[deviceId]?.type) {
+            if (!statusValue.value[deviceId]) {
+                statusValue.value[deviceId] = {};
+            }
+            statusValue.value[deviceId].value = payload?.value.type;
+            statusValue.value[deviceId].text = payload?.value.type == 'online' ? $t('Instance.index.133466-9') : payload?.value.type == 'offline' ? $t('Instance.index.133466-8') : $t('Instance.index.133466-7');
+        }
+    });
+};
+
 // 订阅设备属性更新（每个设备使用独立缓存和节流）
 const subscribeProperty = (deviceId: string, productId: string) => {
-    if (subRef.value[deviceId]) {
-        try { subRef.value[deviceId].unsubscribe(); } catch (e) {}
-    }
+    // if (subRef.value[deviceId]) {
+    //     try { subRef.value[deviceId].unsubscribe(); } catch (e) {}
+    // }
     const id = `instance-info-property-${deviceId}-${productId}-${(properties || []).map((p: any) => p.id).join('-')}`;
     const topic = `/dashboard/device/${productId}/properties/realTime`;
     const localCache = new Map();
@@ -639,9 +662,7 @@ const getDashboard = async (productId: string, deviceId: string) => {
             propertyValue.value[deviceId] = { ...propertyValue.value[deviceId], ...obj };
     }
 
-    if (subRef.value[deviceId]) {
-        try { subRef.value[deviceId].unsubscribe(); } catch (e) {}
-    }
+    subscribeStatus(deviceId);
     subscribeProperty(deviceId, productId);
     loading.value = false;
 };
@@ -1256,6 +1277,9 @@ onMounted(() => {
 
 onUnmounted(() => {
     Object.values(subRef.value || {}).forEach((s: any) => {
+        try { s && s.unsubscribe(); } catch (e) {}
+    });
+    Object.values(statusRef.value || {}).forEach((s: any) => {
         try { s && s.unsubscribe(); } catch (e) {}
     });
 });

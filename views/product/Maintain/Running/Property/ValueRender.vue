@@ -74,19 +74,20 @@
         </div>
         <div
             v-else-if="_data.data?.valueType?.type === 'object'"
+            @click="getDetail('obj')"
             :class="valueClass"
         >
          <div class="cardValue">
                 <div v-if="isChargeState" class="status-indicators">
                     <template v-for="(s, idx) in statusValues" :key="idx">
-                        <a-tooltip :title="getStatusText(s)">
+                        <a-tooltip :title="getStatusText('C'+(idx+1))">
                             <span :class="['status-dot', getChargeClass(s)]"></span>
                         </a-tooltip>
                     </template>
                 </div>
                 <div v-else-if="isLockState" class="lock-status">
                     <template v-for="(s, idx) in statusValues" :key="idx">
-                        <a-tooltip :title="getStatusText(s)">
+                        <a-tooltip :title="getStatusText('C'+(idx+1))">
                             <span :class="['lock-icon', getLockIconClass(s)]">
                                 <i :class="getFaClass(s)" aria-hidden="true"></i>
                             </span>
@@ -95,7 +96,7 @@
                 </div>
                 <div v-else class="status-indicators">
                     <template v-for="(s, idx) in statusValues" :key="idx">
-                        <a-tooltip :title="getStatusText(s)">
+                        <a-tooltip :title="getStatusText('C'+(idx+1))">
                             <span :class="['status-dot', getStatusClass(s)]"></span>
                         </a-tooltip>
                     </template>
@@ -187,7 +188,7 @@ const statusValues = computed(() => {
     // 如果是纯数字且长度>1，将每一位拆分为单个状态
     if (/^\d+$/.test(str) && str.length > 1) return str.split('').map(v => v);
 
-    return raw;
+    return [raw];
 });
 
 // 获取状态点的样式类
@@ -210,11 +211,11 @@ const getStatusClass = (status: any) => {
 
 // 获取状态显示文本，优先使用 valueType.elements 映射
 const getStatusText = (status: any) => {
-    const elems = _data.data?.valueType?.elements || [];
-    if (Array.isArray(elems) && elems.length) {
-        const found = elems.find((e: any) => String(e.value) === String(status) || String(e.text) === String(status));
-        if (found) return found.text;
-    }
+    // const elems = _data.data?.valueType?.elements || [];
+    // if (Array.isArray(elems) && elems.length) {
+    //     const found = elems.find((e: any) => String(e.value) === String(status) || String(e.text) === String(status));
+    //     if (found) return found.text;
+    // }
 
     return String(status);
 };
@@ -416,7 +417,7 @@ const getDetail = (_type: string) => {
             display: flex;
             align-items: flex-start;
             justify-content: flex-start;
-            gap: 5px;
+            gap: 1.5px;
             flex-wrap: wrap;
 
             .lock-icon {
