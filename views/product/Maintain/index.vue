@@ -20,8 +20,8 @@
                                 <div class="product-card-inner" @click="selectedProduct = item.id + '::' + item.orgId">
                                     <img class="product-pic" :src="item.photoUrl" alt="" />
                                     <div class="product-meta">
-                                        <div class="product-name">型号：{{ item.name }}</div>
-                                        <div class="product-type">产品：{{ item.classifiedName }}</div>
+                                        <div class="product-name">{{ $t('Instance.index.133466-41') }}：{{ item.name }}</div>
+                                        <div class="product-type">{{ $t('Instance.index.133466-42') }}：{{ item.classifiedName }}</div>
                                     </div>
                                 </div>
                             </a-card>
@@ -309,7 +309,7 @@ const transformData = (arr: any[]): any[] => {
 const properties = [
     {
         id: 'CHARGE_STATE',
-        name: '充电状态',
+        name: $t('Instance.index.133466-43'),
         valueType: {
             type: 'object',
             elements: [
@@ -321,7 +321,7 @@ const properties = [
     },
     {
         id: 'LOCK_STATE',
-        name: '锁状态',
+        name: $t('Instance.index.133466-44'),
         valueType: {
             type: 'object',
             elements: [
@@ -330,17 +330,6 @@ const properties = [
             ],
         },
     },
-    {
-        id: 'USED_STATE',
-        name: '使用状态',
-        valueType: {
-            type: 'object',
-            elements: [
-                { text: '未使用', value: 0 },
-                { text: '使用中', value: 1 },
-            ],
-        },
-    }
 ];
 
 // lightweight component: when a card mounts, request dashboard for that device

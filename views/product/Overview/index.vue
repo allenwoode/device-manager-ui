@@ -267,7 +267,7 @@ const subRef = ref<Record<string, any>>({});
 const properties = [
     {
         id: 'CHARGE_STATE',
-        name: '充电状态',
+        name: $t('Instance.index.133466-43'),
         valueType: {
             type: 'object',
             elements: [
@@ -279,7 +279,7 @@ const properties = [
     },
     {
         id: 'LOCK_STATE',
-        name: '锁状态',
+        name: $t('Instance.index.133466-44'),
         valueType: {
             type: 'object',
             elements: [
@@ -288,17 +288,6 @@ const properties = [
             ],
         },
     },
-    {
-        id: 'USED_STATE',
-        name: '使用状态',
-        valueType: {
-            type: 'object',
-            elements: [
-                { text: '未使用', value: 0 },
-                { text: '使用中', value: 1 },
-            ],
-        },
-    }
 ];
 
 // lightweight component: when a card mounts, request dashboard for that device
