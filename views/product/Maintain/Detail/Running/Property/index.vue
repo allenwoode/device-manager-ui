@@ -143,8 +143,6 @@ const _params = reactive({
 const tableRef = ref()
 const subRef = ref();
 
-// const list = ref<any[]>([]);
-
 const getActions = (data: Partial<Record<string, any>>) => {
     const arr = [];
     if (data.expands?.type?.includes('write')) {

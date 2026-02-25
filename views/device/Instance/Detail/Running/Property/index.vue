@@ -6,7 +6,7 @@
             :request="query"
             modeValue="CARD"
             :params="_params"
-            :gridColumns="[2, 4]"
+            :gridColumns="[1, 2]"
             :bodyStyle="{ padding: '0 0 0 20px' }"
             :scroll="{y : 450}"
         >
@@ -142,8 +142,6 @@ const _params = reactive({
 });
 const tableRef = ref()
 const subRef = ref();
-
-// const list = ref<any[]>([]);
 
 const getActions = (data: Partial<Record<string, any>>) => {
     const arr = [];

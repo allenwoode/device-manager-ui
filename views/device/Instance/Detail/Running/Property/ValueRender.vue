@@ -77,7 +77,38 @@
             @click="getDetail('obj')"
             :class="valueClass"
         >
-            <img :src="imgMap.get('obj')" />
+         <div class="cardValue">
+                <div v-if="isChargeState" class="status-indicators">
+                    <template v-for="(s, idx) in statusValues" :key="idx">
+                        <a-tooltip :title="getStatusText('C'+(idx+1))">
+                            <span :class="['status-dot', getChargeClass(s)]"></span>
+                        </a-tooltip>
+                    </template>
+                </div>
+                <div v-else-if="isLockState" class="lock-status">
+                    <template v-for="(s, idx) in statusValues" :key="idx">
+                        <a-tooltip :title="getStatusText('C'+(idx+1))">
+                            <span :class="['lock-icon', getLockIconClass(s)]">
+                                <i :class="getFaClass(s)" aria-hidden="true"></i>
+                        </span>
+                        </a-tooltip>
+                    </template>
+                </div>
+                <!-- <div v-else-if="isUsedState" class="lock-status">
+                    <template v-for="(s, idx) in statusValues" :key="idx">
+                        <span :class="['lock-icon', getLockIconClass(s)]">
+                            <AIcon :type="getUsedIcon(s)" />
+                        </span>
+                    </template>
+                </div> -->
+                <div v-else class="status-indicators">
+                    <template v-for="(s, idx) in statusValues" :key="idx">
+                        <a-tooltip :title="getStatusText('C'+(idx+1))">
+                            <span :class="['status-dot', getStatusClass(s)]"></span>
+                        </a-tooltip>
+                    </template>
+                </div>
+            </div>
         </div>
         <div
             v-else-if="
@@ -90,6 +121,7 @@
                 <j-ellipsis>{{ JSON.stringify(value?.formatValue) }}</j-ellipsis>
             </div>
         </div>
+
         <!-- 数值显示样式 - 针对数字类型优化显示 -->
         <div v-else :class="valueClass">
             <div class="value-content" :class="getValueDisplayClass()">
@@ -112,6 +144,7 @@ import { onlyMessage } from '@jetlinks-web/utils';
 import ValueDetail from './ValueDetail.vue';
 import { getType, imgMap, imgList, videoList, fileList } from './index';
 import { useI18n } from 'vue-i18n';
+import '@fortawesome/fontawesome-free/css/all.min.css';
 
 const { t: $t } = useI18n();
 const _data = defineProps({
@@ -143,74 +176,53 @@ const _type = computed(() => {
   return getType(_data.value?.formatValue)
 })
 
-// 判断是否为状态指示器类型
-const isStatusIndicator = computed(() => {
-    const propertyName = _data.data?.name?.toLowerCase() || '';
-    const value = _data.value?.formatValue;
-    
-    // 检查属性名称是否包含状态相关关键词
-    const hasStatusName = propertyName.includes('状态') || 
-                         propertyName.includes('status') ||
-                         propertyName.includes('充电') ||
-                         propertyName.includes('锁');
-    
-    // 检查是否为状态类型的枚举
-    const isStatusEnum = _data.data?.valueType?.type === 'enum' && hasStatusEnum();
-    
-    // 检查值是否为多位数字字符串（如"001111"）
-    const isMultiDigitStatus = typeof value === 'string' && 
-                              /^\d{2,}$/.test(value) && 
-                              value.length <= 10;
-    
-    return hasStatusName || isStatusEnum || isMultiDigitStatus;
+const isChargeState = computed(() => {
+    const id = _data.value?.property || '';
+    return id === 'CHARGE_STATE';
 });
 
-// 判断是否为锁状态
-const isLockStatus = computed(() => {
-    const propertyName = _data.data?.name?.toLowerCase() || '';
-    return propertyName.includes('锁') || 
-           propertyName.includes('lock') ||
-           propertyName.includes('locked') ||
-           propertyName.includes('unlock');
+const isLockState = computed(() => {
+    const id = _data.value?.property || '';
+    return id === 'LOCK_STATE';
 });
 
-// 判断是否为状态枚举
-const hasStatusEnum = () => {
-    const elements = _data.data?.valueType?.elements;
-    if (!elements) return false;
-    
-    // 检查是否包含状态相关的枚举值
-    const statusKeys = Object.keys(elements).some(key => 
-        key.includes('状态') || key.includes('status') || 
-        key.includes('充电') || key.includes('锁') ||
-        elements[key]?.text?.includes('状态')
-    );
-    return statusKeys;
-};
+// const isUsedState = computed(() => {
+//     const id = _data.value?.property || '';
+//     return id === 'USED_STATE';
+// });
 
-// 解析状态值为数组（支持多状态显示）
+// 解析状态值为数组（支持多状态显示），兼容多种格式
 const statusValues = computed(() => {
-    const value = _data.value?.formatValue.state;
-    if (!value) return [];
-    
-    // 如果是数组格式的状态值
-    if (Array.isArray(value)) {
-        return value;
+    let raw = _data.value?.formatValue;
+    if (raw == null) return [];
+
+    // 如果 formatValue 是对象并且包含 state 字段，优先使用它
+    if (typeof raw === 'object' && raw !== null && 'state' in raw) {
+        raw = raw.state;
     }
-    
-    // 如果是字符串格式，尝试解析为多个状态
-    const strValue = String(value);
-    if (strValue.includes(',') || strValue.includes('|')) {
-        return strValue.split(/[,|]/).map(v => v.trim());
-    }
-    
-    // 对于充电状态或锁状态，可能需要根据位数拆分
-    if (strValue.length > 1 && /^\d+$/.test(strValue)) {
-        return strValue.split('').map(v => parseInt(v));
-    }
-    
-    return [value];
+
+    // 数组直接返回
+    if (Array.isArray(raw)) return raw;
+
+    const str = String(raw);
+    // 支持以逗号或竖线分隔的多状态
+    if (str.includes(',') || str.includes('|')) return str.split(/[,|]/).map(v => v.trim());
+
+    // 如果是纯数字且长度>1，将每一位拆分为单个状态
+    if (/^\d+$/.test(str) && str.length > 1) return str.split('').map(v => v);
+
+    return raw;
 });
+
+const getStatusText = (status: any) => {
+    // const elems = _data.data?.valueType?.elements || [];
+    // if (Array.isArray(elems) && elems.length) {
+    //     const found = elems.find((e: any) => String(e.value) === String(status) || String(e.text) === String(status));
+    //     if (found) return found.text;
+    // }
+
+    return String(status);
+};
 
 // 获取状态点的样式类
 const getStatusClass = (status: any) => {
@@ -230,6 +242,15 @@ const getStatusClass = (status: any) => {
     return 'status-default'; // 默认灰色
 };
 
+// 获取充电状态的样式（0 白色, 1 绿色, 2 蓝色）
+const getChargeClass = (status: any) => {
+    const s = String(status);
+    if (s === '0') return 'status-charge-0';
+    if (s === '1') return 'status-charge-1';
+    if (s === '2') return 'status-charge-2';
+    return 'status-default';
+};
+
 // 获取数值显示样式类
 const getValueDisplayClass = () => {
     const valueType = _data.data?.valueType?.type;
@@ -247,9 +268,7 @@ const getValueDisplayClass = () => {
 // 格式化显示值
 const formatDisplayValue = (value: any) => {
     if (value === null || value === undefined) return '--';
-    
     const valueType = _data.data?.valueType?.type;
-    
     // 数字类型格式化
     if (['int', 'long', 'float', 'double'].includes(valueType)) {
         const num = Number(value);
@@ -264,16 +283,22 @@ const formatDisplayValue = (value: any) => {
     return String(value);
 };
 
-// 获取锁状态图标
-const getLockIcon = (status: any) => {
-    const statusStr = String(status);
-    return statusStr === '0' ? 'UnlockOutlined' : 'LockOutlined';
-};
+// const getUsedIcon = (status: any) => {
+//     const statusStr = String(status);
+//     // use filled/solid icons for clearer display
+//     return statusStr === '1' ? 'LoginOutlined' : 'LogoutOutlined';
+// };
 
 // 获取锁状态图标样式类
 const getLockIconClass = (status: any) => {
     const statusStr = String(status);
-    return statusStr === '0' ? 'lock-unlocked' : 'lock-locked';
+    return statusStr === '1' ? 'lock-unlocked' : 'lock-locked';
+};
+
+// FontAwesome class for lock/unlock (uses solid icons)
+const getFaClass = (status: any) => {
+    const statusStr = String(status);
+    return statusStr === '1' ? 'fas fa-lock-open' : 'fas fa-lock';
 };
 
 const onError = (e: any) => {
@@ -287,6 +312,7 @@ const imgError = (e: any) => {
 
 const getDetail = (_type: string) => {
     const value = _data.value;
+    console.log("data value:", _data.value);
     let flag: string = '';
     if (_type === 'img') {
         if (isHttps && value?.formatValue.indexOf('http:') !== -1) {
@@ -363,7 +389,12 @@ const getDetail = (_type: string) => {
                 &.status-active {
                     background-color: #52c41a; // 绿色 - 正常/充电/激活
                     box-shadow: 0 0 6px rgba(82, 196, 26, 0.4);
-                    //animation: statusBlink 2s ease-in-out infinite;
+                }
+
+                .status-label {
+                    font-size: 12px;
+                    color: #595959;
+                    margin-right: 6px;
                 }
 
                 &.status-warning {
@@ -384,29 +415,46 @@ const getDetail = (_type: string) => {
                 &.status-default {
                     background-color: #8c8c8c; // 默认灰色
                 }
+
+                &.status-charge-0 {
+                    background-color: #ffffff;
+                    border: 1px solid #d9d9d9;
+                }
+
+                &.status-charge-1 {
+                    background-color: #52c41a;
+                    box-shadow: 0 0 6px rgba(82, 196, 26, 0.4);
+                }
+
+                &.status-charge-2 {
+                    background-color: #1890ff;
+                    box-shadow: 0 0 6px rgba(24, 144, 255, 0.35);
+                }
             }
         }
 
         // 锁状态图标样式
         .lock-status {
             display: flex;
-            align-items: center;
+            align-items: flex-start;
+            justify-content: flex-start;
             gap: 8px;
             flex-wrap: wrap;
 
             .lock-icon {
                 display: inline-flex;
                 align-items: center;
-                font-size: 20px;
+                font-size: 18px;
                 transition: all 0.3s ease;
-
                 &.lock-unlocked {
                     color: #52c41a; // 绿色 - 已解锁
                 }
-
                 &.lock-locked {
-                    //color: #ff4d4f; // 红色 - 已锁定
                     color: #d9d9d9;
+                }
+                .lock-text {
+                    font-size: 12px;
+                    color: #595959;
                 }
             }
         }
@@ -445,8 +493,8 @@ const getDetail = (_type: string) => {
         // 列表视图中的状态指示器
         .status-indicators {
             display: flex;
-            align-items: center;
-            justify-content: center;
+            align-items: flex-start;
+            justify-content: flex-start;
             gap: 10px;
 
             .status-dot {
@@ -456,7 +504,6 @@ const getDetail = (_type: string) => {
 
                 &.status-active {
                     background-color: #52c41a;
-                    //animation: statusBlink 2s ease-in-out infinite;
                 }
 
                 &.status-warning {
@@ -481,12 +528,13 @@ const getDetail = (_type: string) => {
         // 列表视图中的锁状态图标
         .lock-status {
             display: flex;
-            align-items: center;
-            justify-content: center;
+            align-items: flex-start;
+            justify-content: flex-start;
             gap: 4px;
 
             .lock-icon {
                 font-size: 14px;
+                margin: 2px 0;
 
                 &.lock-unlocked {
                     color: #52c41a;
@@ -501,8 +549,8 @@ const getDetail = (_type: string) => {
         .value-content {
             width: 100%;
             display: flex;
-            justify-content: center;
-            align-items: center;
+            align-items: flex-start;
+            justify-content: flex-start;
             text-align: center;
             
             &.numeric-value {
@@ -518,19 +566,12 @@ const getDetail = (_type: string) => {
     }
 }
 
-// Keyframe animation for status-active blinking
-@keyframes statusBlink {
-    0% {
-        opacity: 1;
-        box-shadow: 0 0 6px rgba(82, 196, 26, 0.4);
-    }
-    50% {
-        opacity: 0.5;
-        box-shadow: 0 0 12px rgba(82, 196, 26, 0.8);
-    }
-    100% {
-        opacity: 1;
-        box-shadow: 0 0 6px rgba(82, 196, 26, 0.4);
-    }
+/* Ensure FontAwesome <i> inherits sizing and color */
+.lock-status i,
+.lock-icon i {
+    font-size: inherit;
+    color: inherit;
+    line-height: 1;
+    display: inline-block;
 }
 </style>

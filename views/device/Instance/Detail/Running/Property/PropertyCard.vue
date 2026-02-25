@@ -120,8 +120,8 @@ watchEffect(() => {
 
         .bottom {
             .time-value {
-                margin-top: 5px;
-                font-size: 16px;
+                margin-top: 10px;
+                font-size: 14px;
                 min-height: 25px;
                 color: #000;
             }
