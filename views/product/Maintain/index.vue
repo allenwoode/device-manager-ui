@@ -221,10 +221,10 @@ import {
     //queryOrgThree,
 } from '../../../api/product';
 
-import { PropertyData } from '../typings';
+import { ActionsType, PropertyData } from '../typings';
 import { queryTree } from '../../../api/category';
 import { useMenuStore } from '@/store/menu';
-import type { ActionsType } from '../../device/Instance/typings';
+
 import dayjs from 'dayjs';
 //import BatchDropdown from '@/components/BatchDropdown/index.vue';
 import type { BatchActionsType } from '@/components/BatchDropdown/types';
@@ -240,7 +240,6 @@ import LeftTree from "../../components/LeftTree.vue";
 //import Card from '@/views/account/center/components/Subscribe/components/Card.vue';
 
 import ValueRender from './Running/Property/ValueRender.vue';
-import { useInstanceStore } from '../../../store/instance';
 import { dashboard } from '../../../api/dashboard';
 
 const { t: $t } = useI18n();
@@ -275,16 +274,9 @@ const propertyValue = ref<Record<string, Record<string, any>>>({});
 // store status values per device: { [deviceId]: valueObj }
 const statusValue = ref<Record<string, any>>({});
 
-const statusMap = new Map();
-
-statusMap.set('online', 'success');
-statusMap.set('offline', 'error');
-statusMap.set('notActive', 'warning');
-
 import { groupBy, throttle, toArray } from 'lodash-es';
 import { wsClient } from '@jetlinks-web/core';
 import { map } from 'rxjs/operators';
-import { defineComponent } from 'vue';
 
 const statusRef = ref<Record<string, any>>({});
 const subRef = ref<Record<string, any>>({});
@@ -349,7 +341,7 @@ const properties = [
             ],
         },
     }
-]
+];
 
 // lightweight component: when a card mounts, request dashboard for that device
 const LoadDeviceValues = defineComponent({
@@ -620,7 +612,6 @@ const subscribeProperty = (deviceId: string, productId: string) => {
 };
 
 const getDashboard = async (productId: string, deviceId: string) => {
-    //console.log('>>>>>getDashboard', productId, deviceId);
     //if(!dataSource.value?.length) return
 
     const param = [

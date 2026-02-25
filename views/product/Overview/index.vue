@@ -68,38 +68,54 @@
                                     offline: 'error',
                                     notActive: 'warning',
                                 }">
-                                <template #img>
-                                    <img :width="80" :height="80" :src="slotProps?.photoUrl ||
-                                        device.deviceCard
-                                        " />
-                                </template>
+
                                 <template #content>
-                                    <j-ellipsis style="width: calc(100% - 100px); margin-bottom: 5px">
-                                        <span style="font-weight: 600; font-size: 16px">
-                                            {{ slotProps.name }}
-                                        </span>
-                                    </j-ellipsis>
-                                    <j-ellipsis style="margin-bottom: 18px">
-                                        <span style="font-weight: 300; font-size: 14px">
-                                            {{ slotProps.id }}
-                                        </span>
-                                    </j-ellipsis>
-                                    <a-row>
-                                        <a-col :span="12">
-                                            <div class="card-item-content-text">
-                                                {{ $t('Instance.index.133466-1') }}
+                                    <div style="display: flex; align-items: flex-start;">
+                                                <j-ellipsis style="margin: 0 20px 0 5px">
+                                                    <img :width="80" :height="80" :src="slotProps.photoUrl" />
+                                                </j-ellipsis>
+                                                <div style="flex: 1; margin-right: 16px; align-items: flex-start;">
+                                                    
+                                                    <j-ellipsis style="margin-bottom: 5px">
+                                                        <span style="font-weight: 600; font-size: 16px">
+                                                            {{ slotProps.name }}
+                                                        </span>
+                                                    </j-ellipsis>
+                                                    <j-ellipsis style="margin-bottom: 18px">
+                                                        <span style="font-weight: 300; font-size: 14px">
+                                                            {{ slotProps.id }}
+                                                        </span>
+                                                    </j-ellipsis>
+                                                    <a-row>
+                                                        <a-col :span="12">
+                                                            <div class="card-item-content-text">
+                                                                {{ $t('Instance.index.133466-1') }}
+                                                            </div>
+                                                            <div>{{ slotProps.deviceType?.text }}</div>
+                                                        </a-col>
+                                                        <a-col :span="12">
+                                                            <div class="card-item-content-text">
+                                                                {{ $t('Instance.index.133466-2') }}
+                                                            </div>
+                                                            <j-ellipsis style="width: 100%">
+                                                                {{ slotProps.productName }}
+                                                            </j-ellipsis>
+                                                        </a-col>
+                                                    </a-row>
+                                                </div>
                                             </div>
-                                            <div>{{ slotProps.deviceType?.text }}</div>
-                                        </a-col>
-                                        <a-col :span="12">
-                                            <div class="card-item-content-text">
-                                                {{ $t('Instance.index.133466-2') }}
+
+                                            <a-divider style="margin: 10px 0" />
+
+                                            <div class="card-props" style="display:flex; flex-direction: column; align-items:flex-start">
+                                                <template v-for="prop in properties" :key="prop.id">
+                                                    <div style="display:flex; flex-direction: column; align-items:flex-start;">
+                                                        <div style="color: #595959; font-size:12px">{{ prop.name }}:</div>
+                                                        <ValueRender :data="prop" :value="propertyValue[slotProps.id]?.[prop.id]" />
+                                                    </div>
+                                                </template>
+                                                <LoadDeviceValues :data="slotProps" />
                                             </div>
-                                            <j-ellipsis style="width: 100%">
-                                                {{ slotProps.productName }}
-                                            </j-ellipsis>
-                                        </a-col>
-                                    </a-row>
                                 </template>
                                 <template #actions="item">
                                     <j-permission-button :disabled="item.disabled" :popConfirm="item.popConfirm"
@@ -177,7 +193,6 @@
 
 <script setup lang="ts">
 import {
-    query1,
     query,
     _delete,
     _deploy,
@@ -194,7 +209,7 @@ import Save from './Save/index.vue';
 import { BASE_API, TOKEN_KEY_URL } from '@jetlinks-web/constants'
 import {
     queryGatewayList,
-    productNav,
+    //productNav,
     //queryOrgThree,
 } from '../../../api/product';
 import { queryTree } from '../../../api/category';
@@ -206,18 +221,16 @@ import type { BatchActionsType } from '@/components/BatchDropdown/types';
 import { useRouterParams } from '@jetlinks-web/hooks';
 //import TagSearch from './components/TagSearch.vue';
 import { Modal } from 'ant-design-vue';
-import { device } from '../../../assets';
+
 //import { isNoCommunity } from '@/utils/utils';
 import { useI18n } from 'vue-i18n';
+
+import ValueRender from './Running/Property/ValueRender.vue';
+import { dashboard } from '../../../api/dashboard';
 
 const { t: $t } = useI18n();
 
 const instanceRef = ref<Record<string, any>>({});
-const productList = ref<Record<string, any>[]>([]);
-const value = ref<string>('');
-const filteredProducts = ref<Record<string, any>[]>([]);
-const selectedProduct = ref<string | undefined>(undefined);
-const selectedProducts = ref<string[]>([]);
 
 const params = ref<Record<string, any>>({});
 const _selectedRowKeys = ref<string[]>([]);
@@ -233,28 +246,100 @@ const operationVisible = ref<boolean>(false);
 const api = ref<string>('');
 const type = ref<string>('');
 
-//const parentIds = ref<string[]>([]);
-//const parentId = ref<string>("");
 const departmentId = ref<string>("");
 
-const onChange = (n: string[] = []) => {
-    departmentId.value = n[0] || "";
-    //parentId.value = n[1] || "";
-    //parentIds.value = n.slice(2);
+//const instanceStore = useInstanceStore();
+//const dataSource = ref<PropertyData[]>([]);
+const loading = ref<boolean>(false);
+// store property values per device: { [deviceId]: { [propertyId]: valueObj } }
+const propertyValue = ref<Record<string, Record<string, any>>>({});
+
+// store status values per device: { [deviceId]: valueObj }
+const statusValue = ref<Record<string, any>>({});
+
+import { groupBy, throttle, toArray } from 'lodash-es';
+import { wsClient } from '@jetlinks-web/core';
+import { map } from 'rxjs/operators';
+
+const statusRef = ref<Record<string, any>>({});
+const subRef = ref<Record<string, any>>({});
+
+const properties = [
+    {
+        id: 'CHARGE_STATE',
+        name: '充电状态',
+        valueType: {
+            type: 'object',
+            elements: [
+                { text: '未充电', value: 0 },
+                { text: '已充满', value: 1 },
+                { text: '充电中', value: 2 },
+            ],
+        },
+    },
+    {
+        id: 'LOCK_STATE',
+        name: '锁状态',
+        valueType: {
+            type: 'object',
+            elements: [
+                { text: '关锁', value: 0 },
+                { text: '开锁', value: 1 },
+            ],
+        },
+    },
+    {
+        id: 'USED_STATE',
+        name: '使用状态',
+        valueType: {
+            type: 'object',
+            elements: [
+                { text: '未使用', value: 0 },
+                { text: '使用中', value: 1 },
+            ],
+        },
+    }
+];
+
+// lightweight component: when a card mounts, request dashboard for that device
+const LoadDeviceValues = defineComponent({
+    props: {
+        data: Object,
+    },
+    setup(props) {
+        onMounted(() => {
+            if (!props.data?.id || !props.data?.productId) return;
+            statusValue.value[props.data.id] = props.data.state || {};
+            if (propertyValue.value[props.data.id] && Object.keys(propertyValue.value[props.data.id]).length) return;
+            if (props.data.productId) getDashboard(props.data.productId, props.data.id);
+        });
+        return () => null;
+    },
+});
+
+const valueChange = (arr: Record<string, any>[], deviceId: string) => {
+    if (!deviceId) return;
+    if (!propertyValue.value[deviceId]) propertyValue.value[deviceId] = {};
+    (arr || [])
+        .sort((a: any, b: any) => a.timestamp - b.timestamp)
+        .forEach((item: any) => {
+            const { value } = item;
+            propertyValue.value[deviceId][value?.property] = { ...item, ...value };
+        });
 };
 
-const onSearch = (v?: string) => {
-    const q = (v ?? value.value ?? '').toString().trim().toLowerCase();
-    if (!q) {
-        filteredProducts.value = productList.value.slice();
-        return;
-    }
-    filteredProducts.value = (productList.value || []).filter((p: any) => {
-        const name = (p.name || '').toString().toLowerCase();
-        const id = (p.id || '').toString().toLowerCase();
-        return name.includes(q) || id.includes(q);
-    });
-};
+// const onSearch = (v?: string) => {
+//     const q = (v ?? value.value ?? '').toString().trim().toLowerCase();
+//     if (!q) {
+//         filteredProducts.value = productList.value.slice();
+//         return;
+//     }
+//     filteredProducts.value = (productList.value || []).filter((p: any) => {
+//         const name = (p.name || '').toString().toLowerCase();
+//         const id = (p.id || '').toString().toLowerCase();
+//         return name.includes(q) || id.includes(q);
+//     });
+// };
 
 // const toggleProductSelection = (id: string, checked: boolean) => {
 //     const idx = selectedProducts.value.indexOf(id);
@@ -476,6 +561,103 @@ const columns = ref([
         scopedSlots: true,
     },
 ]);
+
+// 订阅设备状态
+const subscribeStatus = (deviceId: string) => {
+    statusRef.value[deviceId] = wsClient.getWebSocket(
+        `instance-editor-info-status-${deviceId}`,
+        `/dashboard/device/status/change/realTime`,
+        {
+            deviceId: deviceId,
+        },
+    )
+    ?.pipe(map((res: any) => res.payload))
+    .subscribe((payload) => {
+        //console.log('>>>>>subscribe state update:', statusValue.value[deviceId], payload?.value);
+        if (payload?.value?.type !== statusValue.value[deviceId]?.type) {
+            if (!statusValue.value[deviceId]) {
+                statusValue.value[deviceId] = {};
+            }
+            statusValue.value[deviceId].value = payload?.value.type;
+            statusValue.value[deviceId].text = payload?.value.type == 'online' ? $t('Instance.index.133466-9') : payload?.value.type == 'offline' ? $t('Instance.index.133466-8') : $t('Instance.index.133466-7');
+        }
+    });
+};
+
+// 订阅设备属性更新（每个设备使用独立缓存和节流）
+const subscribeProperty = (deviceId: string, productId: string) => {
+    // if (subRef.value[deviceId]) {
+    //     try { subRef.value[deviceId].unsubscribe(); } catch (e) {}
+    // }
+    const id = `instance-info-property-${deviceId}-${productId}-${(properties || []).map((p: any) => p.id).join('-')}`;
+    const topic = `/dashboard/device/${productId}/properties/realTime`;
+    const localCache = new Map();
+    const localThrottle = throttle(() => {
+        const _list = [...localCache.values()];
+        valueChange(_list, deviceId);
+    }, 500);
+
+    const subscription = wsClient.getWebSocket(id, topic, {
+        deviceId: deviceId,
+        properties: (properties || []).map((p: any) => p.id),
+        history: 1,
+    })
+        ?.pipe(map((res: any) => res.payload))
+        .subscribe((payload) => {
+            if (payload && payload.value && payload.value.property) {
+                localCache.set(payload.value.property, payload);
+                localThrottle();
+            }
+        });
+    subRef.value[deviceId] = subscription;
+};
+
+const getDashboard = async (productId: string, deviceId: string) => {
+    //if(!dataSource.value?.length) return
+
+    const param = [
+        {
+            dashboard: 'device',
+            object: productId, //productId
+            measurement: 'properties',
+            dimension: 'history',
+                params: {
+                deviceId: deviceId, //instanceId
+                history: 1,
+                properties: (properties || []).map((p: any) => p.id), // call for every item in `properties`
+            },
+        },
+    ];
+
+    loading.value = true;
+    const resp: Record<string, any> = await dashboard(param);
+    if (resp.status === 200) {
+        const t1 = (resp.result || []).map((item: any) => {
+            return {
+                timeString: item.data?.timeString,
+                timestamp: item.data?.timestamp,
+                ...item?.data?.value,
+            };
+        });
+        const obj = {};
+        toArray(groupBy(t1, 'property'))
+            .map((item) => {
+                return {
+                    list: item.sort((a, b) => b.timestamp - a.timestamp),
+                    property: item[0].property,
+                };
+            })
+            .forEach((i) => {
+                    obj[i.property] = i.list[0];
+                });
+            if (!propertyValue.value[deviceId]) propertyValue.value[deviceId] = {};
+            propertyValue.value[deviceId] = { ...propertyValue.value[deviceId], ...obj };
+    }
+
+    subscribeStatus(deviceId);
+    subscribeProperty(deviceId, productId);
+    loading.value = false;
+};
 
 const paramsFormat = (
     config: Record<string, any>,
@@ -930,33 +1112,24 @@ const deleteDevice = async () => {
 
 onMounted(() => {
     // load products for left filter
-    productNav({ sorts: [{ name: 'createTime', order: 'desc' }] }).then((resp: any) => {
-        if (resp.status === 200) {
-            productList.value = resp.result as Record<string, any>[];
-            filteredProducts.value = productList.value.slice();
-        }
-    });
+    // productNav({ sorts: [{ name: 'createTime', order: 'desc' }] }).then((resp: any) => {
+    //     if (resp.status === 200) {
+    //         productList.value = resp.result as Record<string, any>[];
+    //         filteredProducts.value = productList.value.slice();
+    //     }
+    // });
 
     // react to product selection or multiple product selection
-    const applyProductFilter = () => {
-        if (selectedProducts.value && selectedProducts.value.length) {
-            params.value = { terms: [{ terms: [{ column: 'productId', termType: 'in', value: selectedProducts.value }] }] };
-        } else if (selectedProduct.value) {
-            params.value = { terms: [{ terms: [{ column: 'productId', termType: 'eq', value: selectedProduct.value }] }] };
-        } else {
-            params.value = {};
-        }
-        instanceRef.value?.reload();
-    };
-
-    watch(
-        () => selectedProduct.value, 
-        () => {
-            // clear multi selection when single product clicked
-            selectedProducts.value = [];
-            applyProductFilter();
-        }
-    );
+    // const applyProductFilter = () => {
+    //     if (selectedProducts.value && selectedProducts.value.length) {
+    //         params.value = { terms: [{ terms: [{ column: 'productId', termType: 'in', value: selectedProducts.value }] }] };
+    //     } else if (selectedProduct.value) {
+    //         params.value = { terms: [{ terms: [{ column: 'productId', termType: 'eq', value: selectedProduct.value }] }] };
+    //     } else {
+    //         params.value = {};
+    //     }
+    //     instanceRef.value?.reload();
+    // };
 
     if (routerParams.params.value?.type === 'add') {
         handleAdd();
@@ -1006,6 +1179,15 @@ onMounted(() => {
     //         },
     //     });
     // }
+});
+
+onUnmounted(() => {
+    Object.values(subRef.value || {}).forEach((s: any) => {
+        try { s && s.unsubscribe(); } catch (e) {}
+    });
+    Object.values(statusRef.value || {}).forEach((s: any) => {
+        try { s && s.unsubscribe(); } catch (e) {}
+    });
 });
 </script>
 
