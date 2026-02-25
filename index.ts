@@ -18,16 +18,6 @@ const getAsyncRoutesMap = () => {
 
 const getExtraRoutesMap = () => {
     return {
-        'asset/Product': {
-            children: [
-                {
-                    code: 'Detail',
-                    url: '/detail/:id',
-                    name: i18n.global.t('device-manager-ui.index.106686-0'),
-                    component: () => import('./views/asset/Product/Detail/index.vue')
-                }
-            ]
-        },
         'device/Product': {
             children: [
                 {

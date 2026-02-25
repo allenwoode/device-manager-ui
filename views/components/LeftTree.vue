@@ -102,7 +102,7 @@ import { onlyMessage } from '@jetlinks-web/utils'
 import { debounce, cloneDeep, omit } from 'lodash-es'
 import Save from './Save.vue'
 import { useRoute } from 'vue-router'
-import { ArrayToTree } from '../asset/util'
+import { ArrayToTree } from '../product/util'
 import { useI18n } from 'vue-i18n';
 
 const { t: $t } = useI18n();
