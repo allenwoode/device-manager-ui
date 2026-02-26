@@ -1893,6 +1893,78 @@
     ]
   },
   {
+    "code": "product",
+    "name": "产品管理",
+    "i18nMessages": {
+      "name": {
+        "zh_CN": "产品管理",
+        "en_US": "Product Management",
+        "en": "Product Management"
+      }
+    },
+    "owner": "iot",
+    "id": "015a8e587acd34e6ed78e144185b224a",
+    "url": "/product",
+    "icon": "icon-chanpin",
+    "sortIndex": 4,
+    "permissions": [],
+    "buttons": [],
+    "children": [
+      {
+        "code": "product/Overview",
+        "name": "设备总览",
+        "i18nMessages": {
+          "name": {
+            "zh_CN": "设备总览",
+            "en_US": "Device Overview",
+            "en": "Device Overview"
+          }
+        },
+        "owner": "iot",
+        "id": "82f73847db0b3799162cf1b4c6913838",
+        "sortIndex": 1,
+        "url": "/product/Overview",
+        "icon": "icon-shebei",
+        "showPage": [
+          "relation"
+        ],
+        "permissions": [],
+        "buttons": [],
+        "accessSupport": {
+          "text": "不支持",
+          "value": "unsupported"
+        },
+        "supportDataAccess": false
+      },
+      {
+        "code": "product/Maintain",
+        "name": "设备管理",
+        "i18nMessages": {
+          "name": {
+            "zh_CN": "设备管理",
+            "en_US": "Device Management",
+            "en": "Device Management"
+          }
+        },
+        "owner": "iot",
+        "id": "f9a851847785c5d9dc8783f07ee876b6",
+        "sortIndex": 2,
+        "url": "/product/Maintain",
+        "icon": "icon-shebeiguanli",
+        "showPage": [
+          "relation"
+        ],
+        "permissions": [],
+        "buttons": [],
+        "accessSupport": {
+          "text": "不支持",
+          "value": "unsupported"
+        },
+        "supportDataAccess": false
+      }
+    ]
+  },
+  {
     "code": "system",
     "name": "系统管理",
     "i18nMessages": {

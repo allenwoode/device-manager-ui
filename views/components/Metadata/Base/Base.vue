@@ -486,7 +486,7 @@ import {
   EditTableFormItem,
   BooleanSelect,
 } from "../../../../components/Metadata";
-import { EventLevel } from "../../../asset/data";
+import { EventLevel } from "../../../device/data";
 import { message } from "ant-design-vue";
 import { Import } from "./components/Import";
 import { useI18n } from "vue-i18n";

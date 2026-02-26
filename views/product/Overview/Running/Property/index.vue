@@ -64,17 +64,17 @@
             </template>
         </JProTable>
     </a-spin>
-    <Save v-if="editVisible" @close="editVisible = false" :data="currentInfo" />
-    <Indicators
+    <!-- <Save v-if="editVisible" @close="editVisible = false" :data="currentInfo" /> -->
+    <!-- <Indicators
         v-if="indicatorVisible"
         @close="indicatorVisible = false"
         :data="currentInfo"
-    />
-    <Detail
+    /> -->
+    <!-- <Detail
         v-if="detailVisible"
         :data="currentInfo"
         @close="detailVisible = false"
-    />
+    /> -->
 </template>
 
 <script lang="ts" setup>
@@ -82,9 +82,9 @@ import { cloneDeep, groupBy, throttle, toArray } from 'lodash-es';
 import { PropertyData } from '../../../typings';
 import PropertyCard from './PropertyCard.vue';
 import ValueRender from './ValueRender.vue';
-import Save from './Save.vue';
-import Detail from './Detail/index.vue';
-import Indicators from './Indicators.vue';
+//import Save from './Save.vue';
+//import Detail from './Detail/index.vue';
+//import Indicators from './Indicators.vue';
 import { getProperty } from '../../../../../api/instance';
 import { dashboard } from '../../../../../api/dashboard';
 import { useInstanceStore } from '../../../../../store/instance';

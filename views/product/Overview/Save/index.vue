@@ -169,7 +169,7 @@ import { queryNoPagingPost } from '../../../../api/product';
 import { getTreeData_api } from '../../../../api/department';
 import { isExists, add, update } from '../../../../api/instance';
 import { onlyMessage } from '@jetlinks-web/utils';
-import { device} from "../../../../assets";
+import { device } from "../../../../assets";
 import { useI18n } from 'vue-i18n';
 import { isInput } from '@device/utils/utils';
 //import { co } from '@fullcalendar/core/internal-common';
