@@ -1,7 +1,7 @@
 <template>
     <div class="value">
         <div
-            v-if="value?.formatValue !== 0 && !value?.formatValue"
+            v-if="state !== 'online' || !value?.formatValue"
             :class="valueClass"
         >
             --
@@ -137,6 +137,10 @@ const _data = defineProps({
         type: String,
         default: 'card',
     },
+    state: {
+        type: String,
+        default: 'false',
+    }
 });
 
 const valueClass = computed(() => {

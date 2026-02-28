@@ -115,7 +115,7 @@
                                                 <template v-for="prop in properties" :key="prop.id">
                                                     <div style="display:flex; flex-direction: column; align-items:flex-start;">
                                                         <div style="color: #595959; font-size:12px">{{ prop.name }}:</div>
-                                                        <ValueRender :data="prop" :value="propertyValue[slotProps.id]?.[prop.id]" />
+                                                        <ValueRender :data="prop" :state="slotProps.state?.value" :value="propertyValue[slotProps.id]?.[prop.id]" />
                                                     </div>
                                                 </template>
                                                 <LoadDeviceValues :data="slotProps" />
@@ -1201,6 +1201,8 @@ onMounted(() => {
                 sorts: [{ name: 'id', order: 'desc' }]
             };
             instanceRef.value?.reload();
+
+            selectedProduct.value = '';
         }
         
     );
