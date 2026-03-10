@@ -4,28 +4,6 @@
         <pro-search :columns="columns" target="device-instance" @search="handleSearch" />
         <FullPage>
 
-            <div class="property-box">
-                <!-- <div class="property-box-left">
-                    <div class="product-nav">
-                        <a-input-search v-model:value="value" :placeholder="$t('Instance.index.133466-40')"
-                            style="width: 260px; margin-bottom: 10px" @search="onSearch" :allowClear="true" />
-                        <div class="product-list">
-                            <a-card v-for="item in filteredProducts" :key="item.id"
-                                :class="['product-card', { active: selectedProduct === item.id || selectedProducts.includes(item.id) }]"
-                                hoverable>
-                                <div class="product-card-inner" @click="selectedProduct = item.id">
-                                    <img class="product-pic" :src="item.photoUrl || device.deviceCard" alt="" />
-                                    <div class="product-meta">
-                                        <div class="product-name">型号：{{ item.name }}</div>
-                                        <div class="product-type">产品：{{ item.classifiedName }}</div>
-                                    </div>
-                                </div>
-                            </a-card>
-                        </div>
-                    </div>
-                </div> -->
-
-                <div class="property-box-right">
                     <JProTable ref="instanceRef"
                         :columns="columns" 
                         :request="query" 
@@ -170,10 +148,7 @@
                                 </template>
                             </a-space>
                         </template>
-
                     </JProTable>
-                </div>
-            </div>
         </FullPage>
     </j-page-container>
 

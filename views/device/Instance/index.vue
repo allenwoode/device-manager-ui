@@ -6,31 +6,14 @@
 
             <div class="property-box">
                 <div class="property-box-left">
-                    <!-- <div class="product-nav">
-                        <a-input-search v-model:value="value" :placeholder="$t('Instance.index.133466-40')"
-                            style="width: 260px; margin-bottom: 10px" @search="onSearch" :allowClear="true" />
-                        <div class="product-list">
-
-                            <a-card v-for="item in filteredProducts" :key="item.id"
-                                :class="['product-card', { active: selectedProduct === item.id || selectedProducts.includes(item.id) }]"
-                                hoverable>
-                                <div class="product-card-inner" @click="selectedProduct = item.id">
-                                    <img class="product-pic" :src="item.photoUrl || device.deviceCard" alt="" />
-                                    <div class="product-meta">
-                                        <div class="product-name">{{ item.name }}</div>
-                                    </div>
-                                </div>
-                            </a-card>
-                            
-                        </div>
-                    </div> -->
                     <div class="organization-nav">
                         <LeftTree @change="onChange" />
                     </div>
                 </div>
 
                 <div class="property-box-right">
-                    <JProTable ref="instanceRef"
+                    <JProTable 
+                        ref="instanceRef"
                         :columns="columns" 
                         :request="query" 
                         :defaultParams="{
@@ -54,7 +37,6 @@
                                     </template>
                                     {{ $t('Instance.index.133466-0') }}
                                 </j-permission-button>
-                                <!-- 批量操作 -->
                                 <BatchDropdown 
                                     v-model:isCheck="isCheck" 
                                     :actions="batchActions"
@@ -215,12 +197,6 @@ import LeftTree from "./components/LeftTree.vue";
 const { t: $t } = useI18n();
 
 const instanceRef = ref<Record<string, any>>({});
-const productList = ref<Record<string, any>[]>([]);
-const value = ref<string>('');
-const filteredProducts = ref<Record<string, any>[]>([]);
-const selectedProduct = ref<string | undefined>(undefined);
-const selectedProducts = ref<string[]>([]);
-
 const params = ref<Record<string, any>>({});
 const _selectedRowKeys = ref<string[]>([]);
 const importVisible = ref<boolean>(false);
@@ -235,37 +211,10 @@ const operationVisible = ref<boolean>(false);
 const api = ref<string>('');
 const type = ref<string>('');
 
-//const parentIds = ref<string[]>([]);
-//const parentId = ref<string>("");
 const departmentId = ref<string>("");
-
 const onChange = (n: string[] = []) => {
     departmentId.value = n[0] || "";
-    //parentId.value = n[1] || "";
-    //parentIds.value = n.slice(2);
 };
-
-const onSearch = (v?: string) => {
-    const q = (v ?? value.value ?? '').toString().trim().toLowerCase();
-    if (!q) {
-        filteredProducts.value = productList.value.slice();
-        return;
-    }
-    filteredProducts.value = (productList.value || []).filter((p: any) => {
-        const name = (p.name || '').toString().toLowerCase();
-        const id = (p.id || '').toString().toLowerCase();
-        return name.includes(q) || id.includes(q);
-    });
-};
-
-// const toggleProductSelection = (id: string, checked: boolean) => {
-//     const idx = selectedProducts.value.indexOf(id);
-//     if (checked) {
-//         if (idx === -1) selectedProducts.value.push(id);
-//     } else {
-//         if (idx !== -1) selectedProducts.value.splice(idx, 1);
-//     }
-// };
 
 const isCheck = ref<boolean>(false);
 const routerParams = useRouterParams();
@@ -737,19 +686,6 @@ const delSelectedDevice = () => {
     return response;
 };
 
-// const activeSelectedDevice = async () => {
-//     if(!_selectedRowKeys.value.length){
-//         onlyMessage($t('Instance.index.133466-29'), 'error')
-//         return
-//     }
-//     const resp = await batchDeployDevice(_selectedRowKeys.value);
-//     if (resp.status === 200) {
-//         onlyMessage($t('Instance.index.133466-24'));
-//         _selectedRowKeys.value = [];
-//         instanceRef.value?.reload();
-//     }
-// };
-
 const disabledSelectedDevice = () => {
     if (!_selectedRowKeys.value.length) {
         onlyMessage($t('Instance.index.133466-29'), 'error');
@@ -931,35 +867,6 @@ const deleteDevice = async () => {
 };
 
 onMounted(() => {
-    // load products for left filter
-    queryNoPagingPost({ paging: false, sorts: [{ name: 'createTime', order: 'desc' }] }).then((resp: any) => {
-        if (resp.status === 200) {
-            productList.value = resp.result as Record<string, any>[];
-            filteredProducts.value = productList.value.slice();
-        }
-    });
-
-    // react to product selection or multiple product selection
-    const applyProductFilter = () => {
-        if (selectedProducts.value && selectedProducts.value.length) {
-            params.value = { terms: [{ terms: [{ column: 'productId', termType: 'in', value: selectedProducts.value }] }] };
-        } else if (selectedProduct.value) {
-            params.value = { terms: [{ terms: [{ column: 'productId', termType: 'eq', value: selectedProduct.value }] }] };
-        } else {
-            params.value = {};
-        }
-        instanceRef.value?.reload();
-    };
-
-    watch(
-        () => selectedProduct.value, 
-        () => {
-        // clear multi selection when single product clicked
-        selectedProducts.value = [];
-        applyProductFilter();
-        }
-    );
-
     watch(
         () => departmentId.value,
         () => {
@@ -972,19 +879,6 @@ onMounted(() => {
             //alert(departmentId.value);
         }
     );
-
-    // live filter when search value changes
-    watch(value, (v) => {
-        onSearch(v as unknown as string);
-    });
-
-    watch(() => selectedProducts.value.slice(), () => {
-        // clear single selection when multi selected
-        if (selectedProducts.value && selectedProducts.value.length) {
-            selectedProduct.value = undefined;
-        }
-        applyProductFilter();
-    });
 
     if (routerParams.params.value?.type === 'add') {
         handleAdd();
@@ -1040,6 +934,8 @@ onMounted(() => {
 <style scoped>
 .property-box {
     display: flex;
+    width: 100%;
+    height: 100%;
 
     .property-box-left {
         display: flex;

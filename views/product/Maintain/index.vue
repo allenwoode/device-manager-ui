@@ -2,7 +2,7 @@
     <j-page-container>
         <!-- 搜索栏 -->
         <pro-search :columns="columns" target="device-instance" @search="handleSearch" />
-        <FullPage>
+        <FullPage showScroll>
 
             <div class="property-box">
                 <div class="property-box-left">
@@ -561,7 +561,6 @@ const subscribeStatus = (deviceId: string) => {
     )
     ?.pipe(map((res: any) => res.payload))
     .subscribe((payload) => {
-        //console.log('>>>>>subscribe state update:', statusValue.value[deviceId], payload?.value);
         if (payload?.value?.type !== statusValue.value[deviceId]?.type) {
             if (!statusValue.value[deviceId]) {
                 statusValue.value[deviceId] = {};
@@ -1270,16 +1269,20 @@ onUnmounted(() => {
 <style scoped>
 .property-box {
     display: flex;
+    width: 100%;
+    height: 100%;
 
     .property-box-left {
         display: flex;
         flex-direction: column;
-
-        max-height: calc(100vh - 140px);
+        height: 100%;
+        overflow-y: auto;
     }
 
     .property-box-right {
         flex: 1;
+        height: 100%;
+        overflow-y: auto;
     }
 }
 
