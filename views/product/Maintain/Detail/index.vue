@@ -154,10 +154,10 @@ const initList = [
     //     key: 'Metadata',
     //     tab: $t('Detail.index.957187-13'),
     // },
-    // {
-    //     key: 'Function',
-    //     tab: $t('Detail.index.957187-14'),
-    // },
+    {
+        key: 'Function',
+        tab: $t('Detail.index.957187-14'),
+    },
     {
         key: 'Log',
         tab: $t('Detail.index.957187-15'),

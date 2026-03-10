@@ -97,59 +97,6 @@ watch(
     },
 );
 
-// watch(
-//     () => events.value,
-//     (newVal) => {
-//         console.log(events.value,'test')
-//         if (events.value && newVal.length) {
-//             newVal.map((item: any) => {
-//                 tabList.value.push({
-//                     ...item,
-//                     key: item.id,
-//                     tab: item.name,
-//                     type: 'event',
-//                 });
-//             });
-//         }
-//     },
-//     {
-//         deep: true,
-//         immediate: true,
-//     },
-// );
-
-const onSearch = () => {
-    const arr = [
-        {
-            key: 'property',
-            tab: $t('Running.index.376017-1'),
-            type: 'property',
-        },
-        ...events.value.map((item: any) => {
-            return {
-                ...item,
-                key: item.id,
-                tab: item.name,
-                type: 'event',
-            };
-        }),
-    ];
-    if (value.value) {
-        const li = arr.filter((i: any) => {
-            return i?.tab.indexOf(value.value) !== -1;
-        });
-        tabList.value = cloneDeep(li);
-    } else {
-        tabList.value = cloneDeep(arr);
-    }
-    const dt = tabList.value?.[0];
-    if (dt) {
-        data.value = dt;
-        type.value = dt.type;
-    } else {
-        type.value = '';
-    }
-};
 const tabChange = (key: string) => {
     const dt = tabList.value.find((i) => i.key === key);
     if (dt) {
