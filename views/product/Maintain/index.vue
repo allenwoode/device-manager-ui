@@ -139,8 +139,8 @@
 
                         <template #state="slotProps">
                             <j-badge-status 
-                            :status="statusValue[slotProps.id]?.value" 
-                            :text="statusValue[slotProps.id]?.text" 
+                            :status="slotProps.state?.value" 
+                            :text="slotProps.state?.text" 
                             :statusNames="{
                                 online: 'processing',
                                 offline: 'error',
@@ -175,7 +175,7 @@
                                     }" @click="i.onClick" 
                                         type="link" 
                                         style="padding: 0 5px" :danger="i.key === 'delete'"
-                                        :hasPermission="i.key === 'view' ? true : 'device/Instance:' + i.key
+                                        :hasPermission="i.key === 'view' ? true : 'product/Maintain:' + i.key
                                     ">
                                         <template #icon>
                                             <AIcon :type="i.icon" />
