@@ -118,13 +118,14 @@
                         </a-form>
                         <div class="editor-btn">
                             <a-space>
-                                <a-button
+                                <j-permission-button
                                     type="primary"
                                     :loading="loading"
                                     @click="handleExecute(func)"
+                                    hasPermission="product/Maintain:execute"
                                 >
                                     {{ $t('components.Simple.448047-3') }}
-                                </a-button>
+                                </j-permission-button>
                                 <a-button
                                     type="default"
                                     @click="handleClear(func)"

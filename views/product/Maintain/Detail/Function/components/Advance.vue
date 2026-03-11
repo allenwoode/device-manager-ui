@@ -32,13 +32,14 @@
                     />
                     <div class="editor-btn">
                         <a-space>
-                            <a-button
+                            <j-permission-button
                                 type="primary"
                                 :loading="loading"
                                 @click="handleExecute(current)"
+                                hasPermission="product/Maintain:execute"
                             >
                                 {{ $t('components.Advance.648416-0') }}
-                            </a-button>
+                            </j-permission-button>
                             <a-button type="default" @click="handleClear()">
                                 {{ $t('components.Advance.648416-1') }}
                             </a-button>
